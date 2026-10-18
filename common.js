@@ -5,11 +5,12 @@
  * - 터치/마우스 캔버스 전자서명 패드 엔진
  */
 
+const COMMON_GITHUB_PAGES_BASE = 'https://rlagusover.github.io/-/';
 const DEFAULT_LOCAL_IP = '192.168.0.3';
 const DEFAULT_PORT = 8080;
 
 
-const STORAGE_KEYS = {
+const COMMON_STORAGE_KEYS = {
   TBM: 'safety_tbm_records_v1',
   RISK: 'safety_risk_records_v1',
   CONFIG_IP: 'safety_custom_ip_v1'
@@ -22,7 +23,7 @@ const SafetyDB = {
   // TBM 일지 목록 조회
   getTbmList() {
     try {
-      const data = localStorage.getItem(STORAGE_KEYS.TBM);
+      const data = localStorage.getItem(COMMON_STORAGE_KEYS.TBM);
       return data ? JSON.parse(data) : [];
     } catch (e) {
       console.error('TBM 데이터 로드 실패:', e);
@@ -51,7 +52,7 @@ const SafetyDB = {
         list.unshift(tbmData);
       }
     }
-    localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(list));
+    localStorage.setItem(COMMON_STORAGE_KEYS.TBM, JSON.stringify(list));
     this.syncToServer();
     return tbmData;
   },
@@ -59,14 +60,14 @@ const SafetyDB = {
   // TBM 일지 삭제
   deleteTbm(id) {
     const list = this.getTbmList().filter(item => item.id !== id);
-    localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(list));
+    localStorage.setItem(COMMON_STORAGE_KEYS.TBM, JSON.stringify(list));
     this.syncToServer();
   },
 
   // 위험성평가 목록 조회
   getRiskList() {
     try {
-      const data = localStorage.getItem(STORAGE_KEYS.RISK);
+      const data = localStorage.getItem(COMMON_STORAGE_KEYS.RISK);
       return data ? JSON.parse(data) : [];
     } catch (e) {
       console.error('위험성평가 데이터 로드 실패:', e);
@@ -95,7 +96,7 @@ const SafetyDB = {
         list.unshift(riskData);
       }
     }
-    localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(list));
+    localStorage.setItem(COMMON_STORAGE_KEYS.RISK, JSON.stringify(list));
     this.syncToServer();
     return riskData;
   },
@@ -103,14 +104,14 @@ const SafetyDB = {
   // 위험성평가 삭제
   deleteRisk(id) {
     const list = this.getRiskList().filter(item => item.id !== id);
-    localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(list));
+    localStorage.setItem(COMMON_STORAGE_KEYS.RISK, JSON.stringify(list));
     this.syncToServer();
   },
 
   // 전체 데이터 초기화
   clearAll() {
-    localStorage.removeItem(STORAGE_KEYS.TBM);
-    localStorage.removeItem(STORAGE_KEYS.RISK);
+    localStorage.removeItem(COMMON_STORAGE_KEYS.TBM);
+    localStorage.removeItem(COMMON_STORAGE_KEYS.RISK);
     this.syncToServer();
   },
 
@@ -144,10 +145,10 @@ const SafetyDB = {
         const data = await res.json();
         if (data && (data.tbm || data.risk)) {
           if (data.tbm && data.tbm.length > 0) {
-            localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(data.tbm));
+            localStorage.setItem(COMMON_STORAGE_KEYS.TBM, JSON.stringify(data.tbm));
           }
           if (data.risk && data.risk.length > 0) {
-            localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(data.risk));
+            localStorage.setItem(COMMON_STORAGE_KEYS.RISK, JSON.stringify(data.risk));
           }
           return true;
         }
@@ -275,8 +276,8 @@ const SafetyDB = {
       }
     ];
 
-    localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(sampleTbm));
-    localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(sampleRisk));
+    localStorage.setItem(COMMON_STORAGE_KEYS.TBM, JSON.stringify(sampleTbm));
+    localStorage.setItem(COMMON_STORAGE_KEYS.RISK, JSON.stringify(sampleRisk));
     this.syncToServer();
   }
 };
@@ -429,7 +430,9 @@ const FIREBASE_CONFIG = {
 let firebaseDb = null;
 let firebaseReady = (async function () {
   try {
-    if (!window.firebase) throw new Error('Firebase SDK를 불러오지 못했습니다.');
+    if (!window.firebase || typeof window.firebase.initializeApp !== 'function') throw new Error('Firebase App SDK를 불러오지 못했습니다.');
+    if (typeof window.firebase.auth !== 'function') throw new Error('Firebase Auth SDK를 불러오지 못했습니다. index.html의 firebase-auth-compat.js 로드를 확인하세요.');
+    if (typeof window.firebase.firestore !== 'function') throw new Error('Firebase Firestore SDK를 불러오지 못했습니다.');
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     firebaseDb = firebase.firestore();
     // Firestore 규칙의 request.auth != null 조건을 충족하도록 익명 로그인
@@ -498,8 +501,8 @@ SafetyDB.pullFromServer = async function() {
     const tbm = tbmSnap.docs.map(d => d.data()).sort((a,b) => String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
     const risk = riskSnap.docs.map(d => d.data()).sort((a,b) => String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
     if (tbm.length || risk.length) {
-      localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(tbm));
-      localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(risk));
+      localStorage.setItem(COMMON_STORAGE_KEYS.TBM, JSON.stringify(tbm));
+      localStorage.setItem(COMMON_STORAGE_KEYS.RISK, JSON.stringify(risk));
       return true;
     }
     return false;
@@ -514,7 +517,7 @@ SafetyDB.pullFromServer = async function() {
 (async function initializeSafetyApp() {
   const cloudHasData = await SafetyDB.pullFromServer();
   if (cloudHasData) return;
-  const hasLocal = !!(localStorage.getItem(STORAGE_KEYS.TBM) || localStorage.getItem(STORAGE_KEYS.RISK));
+  const hasLocal = !!(localStorage.getItem(COMMON_STORAGE_KEYS.TBM) || localStorage.getItem(COMMON_STORAGE_KEYS.RISK));
   if (hasLocal) {
     await SafetyDB.syncToServer();
   } else {

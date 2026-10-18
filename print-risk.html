@@ -155,6 +155,22 @@
 
   <script src="common.js"></script>
   <script>
+    if (typeof window.SafetyDB === 'undefined') {
+      window.SafetyDB = {
+        getRiskList() {
+          try {
+            const data = localStorage.getItem('safety_risk_records_v1');
+            return data ? JSON.parse(data) : [];
+          } catch(e) { return []; }
+        },
+        getRiskById(id) {
+          return this.getRiskList().find(item => item.id === id);
+        },
+        seedSampleData() {},
+        async pullFromServer() { return false; }
+      };
+    }
+
     window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('print-time').textContent = new Date().toLocaleString('ko-KR');
 

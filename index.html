@@ -108,10 +108,11 @@
       <span>🛡️ 스마트 현장 안전관리</span>
       <span class="badge" id="env-badge">로컬 웹</span>
     </a>
-    <nav class="nav-links">
+    <nav class="nav-links" style="display:flex; align-items:center; gap:8px;">
       <a href="index.html" class="nav-link active">관리자 대시보드</a>
       <a href="tbm.html" class="nav-link">📱 TBM 모바일 작성</a>
       <a href="risk.html" class="nav-link">📋 위험성평가 모바일 작성</a>
+      <button type="button" class="btn btn-sm" onclick="openQrModal('tbm.html')" style="background:#f59e0b; color:#0f172a; font-weight:700; border:none; padding:5px 12px; border-radius:6px; cursor:pointer;">📱 QR코드 열기</button>
     </nav>
   </header>
 
@@ -119,7 +120,7 @@
 
     <!-- 현장 링크 배너 -->
     <div class="action-banner">
-      <div>
+      <div style="flex: 1; min-width: 280px;">
         <h2>작업 전 TBM 및 위험성평가 모바일 점검 시스템</h2>
         <p>현장 근로자는 스마트폰 QR 코드로 접속하여 서명을 수행하며, 관리자는 고용노동부 공식 서식에 맞춘 A4 출력물을 즉시 인쇄·보관할 수 있습니다.</p>
         <div id="github-pages-banner-box" style="margin-top:10px; font-size:0.875rem; background:rgba(255,255,255,0.18); padding:10px 14px; border-radius:6px; border:1px solid rgba(255,255,255,0.3);">
@@ -127,20 +128,28 @@
           <a id="banner-github-link" href="https://rlagusover.github.io/-/tbm.html" target="_blank" style="color:#fde047; font-weight:700; text-decoration:underline;">https://rlagusover.github.io/-/tbm.html</a>
           <button class="btn btn-secondary btn-sm" onclick="copyGithubDirectLink()" style="margin-left:8px; padding:2px 8px; font-size:0.75rem;">주소 복사</button>
         </div>
-        <div id="site-guide-info" style="margin-top:6px; font-size:0.8rem; color:#e2e8f0;">
+        <div id="site-guide-info" style="margin-top:8px; font-size:0.8rem; color:#e2e8f0;">
           💡 <strong>현장 모바일 바로가기</strong>: 
           <a href="tbm.html" style="color:#fde047; text-decoration:underline; font-weight:600;">TBM 일지</a> / 
           <a href="risk.html" style="color:#fde047; text-decoration:underline; font-weight:600;">위험성평가</a>
           (스마트폰·PC 어디서나 별도 서버 없이 즉시 열립니다)
         </div>
       </div>
-      <div class="btn-group">
-        <button class="btn btn-accent" onclick="openQrModal('tbm.html')">
-          📱 TBM QR코드 열기
-        </button>
-        <button class="btn btn-primary" onclick="openQrModal('risk.html')" style="background:#2563eb; border:1px solid #60a5fa;">
-          📋 위험성평가 QR 열기
-        </button>
+
+      <!-- 상시 노출 현장 즉시 스캔 QR코드 카드 -->
+      <div style="background:white; color:#0f172a; padding:14px; border-radius:10px; text-align:center; box-shadow:0 6px 16px rgba(0,0,0,0.3); min-width:180px; display:flex; flex-direction:column; align-items:center;">
+        <div style="font-size:0.85rem; font-weight:800; color:#1e3a8a; margin-bottom:6px;">📱 스마트폰 즉시 스캔</div>
+        <div id="banner-qr-target" style="display:inline-block; border:1px solid #cbd5e1; border-radius:6px; padding:6px; background:#fff;">
+          <img id="banner-qr-img" 
+               src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Frlagusover.github.io%2F-%2Ftbm.html" 
+               alt="TBM QR코드" width="140" height="140" style="display:block; margin:0 auto;"
+               onerror="if(!this.dataset.retry){this.dataset.retry='1';this.src='https://quickchart.io/qr?size=140&text=https%3A%2F%2Frlagusover.github.io%2F-%2Ftbm.html';}" />
+        </div>
+        <div id="banner-qr-title" style="font-size:0.75rem; color:#0f172a; margin-top:6px; font-weight:700;">[ TBM 일지 작성 QR ]</div>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <button type="button" class="btn btn-primary btn-sm" onclick="openQrModal('tbm.html')" style="font-size:0.75rem; padding:4px 8px;">🔍 크게 보기</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="toggleBannerQr()" id="btn-banner-switch" style="font-size:0.75rem; padding:4px 8px;">위험성평가 QR</button>
+        </div>
       </div>
     </div>
 
@@ -172,6 +181,7 @@
           <p class="card-subtitle">스마트폰에서 작업자 서명을 마친 실시간 TBM 일지 목록입니다.</p>
         </div>
         <div class="btn-group">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openQrModal('tbm.html')">📱 TBM QR코드 열기</button>
           <a href="tbm.html" class="btn btn-primary btn-sm">+ 신규 TBM 직접 작성</a>
         </div>
       </div>
@@ -203,6 +213,7 @@
           <p class="card-subtitle">작업단계별 위험요인과 개선대책이 수립된 평가표 목록입니다.</p>
         </div>
         <div class="btn-group">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openQrModal('risk.html')">📋 위험성평가 QR코드 열기</button>
           <a href="risk.html" class="btn btn-primary btn-sm">+ 신규 위험성평가 작성</a>
         </div>
       </div>
@@ -295,6 +306,205 @@
     let currentTargetFile = 'tbm.html';
     let currentQrFullUrl = `${GITHUB_PAGES_BASE}tbm.html`;
     let activeConnMode = 'github';
+    let bannerCurrentTarget = 'tbm.html';
+
+    // =========================================================================
+    // 0. 자체 내장 데이터 관리자 & 유틸리티 (common.js 누락 시에도 100% 정상 작동)
+    // =========================================================================
+    const STORAGE_KEYS = {
+      TBM: 'safety_tbm_records_v1',
+      RISK: 'safety_risk_records_v1',
+      CONFIG_IP: 'safety_custom_ip_v1'
+    };
+
+    if (typeof window.SafetyDB === 'undefined') {
+      window.SafetyDB = {
+        getTbmList() {
+          try {
+            const data = localStorage.getItem(STORAGE_KEYS.TBM);
+            return data ? JSON.parse(data) : [];
+          } catch(e) { return []; }
+        },
+        getTbmById(id) {
+          return this.getTbmList().find(item => item.id === id);
+        },
+        saveTbm(tbmData) {
+          const list = this.getTbmList();
+          if (!tbmData.id) {
+            tbmData.id = 'TBM-' + Date.now();
+            tbmData.createdAt = new Date().toISOString();
+            list.unshift(tbmData);
+          } else {
+            const idx = list.findIndex(item => item.id === tbmData.id);
+            if (idx >= 0) list[idx] = { ...list[idx], ...tbmData, updatedAt: new Date().toISOString() };
+            else list.unshift(tbmData);
+          }
+          localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(list));
+          return tbmData;
+        },
+        deleteTbm(id) {
+          const list = this.getTbmList().filter(item => item.id !== id);
+          localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(list));
+        },
+        getRiskList() {
+          try {
+            const data = localStorage.getItem(STORAGE_KEYS.RISK);
+            return data ? JSON.parse(data) : [];
+          } catch(e) { return []; }
+        },
+        getRiskById(id) {
+          return this.getRiskList().find(item => item.id === id);
+        },
+        saveRisk(riskData) {
+          const list = this.getRiskList();
+          if (!riskData.id) {
+            riskData.id = 'RISK-' + Date.now();
+            riskData.createdAt = new Date().toISOString();
+            list.unshift(riskData);
+          } else {
+            const idx = list.findIndex(item => item.id === riskData.id);
+            if (idx >= 0) list[idx] = { ...list[idx], ...riskData, updatedAt: new Date().toISOString() };
+            else list.unshift(riskData);
+          }
+          localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(list));
+          return riskData;
+        },
+        deleteRisk(id) {
+          const list = this.getRiskList().filter(item => item.id !== id);
+          localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(list));
+        },
+        clearAll() {
+          localStorage.removeItem(STORAGE_KEYS.TBM);
+          localStorage.removeItem(STORAGE_KEYS.RISK);
+        },
+        async syncToServer() {
+          if (window.location.hostname.includes('github.io') || !window.location.protocol.startsWith('http')) return;
+          try {
+            await fetch('/api/save-all', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ tbm: this.getTbmList(), risk: this.getRiskList() })
+            });
+          } catch(e) {}
+        },
+        async pullFromServer() {
+          if (window.location.hostname.includes('github.io') || !window.location.protocol.startsWith('http')) return false;
+          try {
+            const res = await fetch('/api/data');
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.tbm) localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(data.tbm));
+              if (data && data.risk) localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(data.risk));
+              return true;
+            }
+          } catch(e) {}
+          return false;
+        },
+        seedSampleData() {
+          const sampleTbm = [{
+            id: 'TBM-SAMPLE-01',
+            siteName: 'lg유플러스 유선통신공사(관로/선로)- 제주권',
+            workType: '접속작업, 차량유도',
+            date: new Date().toISOString().slice(0, 10),
+            time: '08:00 ~ 08:20',
+            location: '제주 관로 및 선로 작업구간',
+            leaderName: '홍길동 (작업책임자)',
+            workerCount: 4,
+            checklistItems: [
+              { no: 1, question: '작업 조건과 작업 범위에 대해 검토했는가?', result: '여' },
+              { no: 2, question: '해당 NW_작업안전가이드를 검토했는가?', result: '여' },
+              { no: 3, question: '공구 사용법에 대해 논의 했는가?', result: '여' },
+              { no: 4, question: '사용되는 장비 및 공구의 이상 유무를 확인했는가?', result: '여' },
+              { no: 5, question: '작업전 보호구 및 안전장비의 이상 유무를 확인했는가?', result: '여' },
+              { no: 6, question: '유해·위험요인에 대해 조치를 실시하였는가?', result: '여' },
+              { no: 7, question: '작업계획서를 작성하고 내용을 검토했는가?', result: '여' },
+              { no: 8, question: '안전장구류 착용상태는 양호한가?', result: '여' },
+              { no: 9, question: '작업자의 건강상태는 양호한가?', result: '여' },
+              { no: 10, question: '위험성평가 내용을 전파하였는가?', result: '여' },
+              { no: 11, question: '잠재위험 및 안전대책에 대해 전파하였는가?', result: '여' },
+              { no: 12, question: '근로자의 작업중지권에 대해 설명했는가?', result: '여' },
+              { no: 13, question: '작업구역 내 정리·정돈 상태는 양호한가?', result: '여' },
+              { no: 14, question: '비상연락망 및 비상시 응급조치 절차를 숙지하였는가?', result: '여' }
+            ],
+            specialInstructions: '관로 작업 전 산소 및 유해가스 농도 측정 철저, 도로변 작업 시 신호수 배치 및 안전삼각대·칼라콘 설치 철저.',
+            workers: [
+              { name: '김철수', role: '접속공', health: '양호' },
+              { name: '이영희', role: '접속공', health: '양호' },
+              { name: '박민우', role: '차량유도원', health: '양호' },
+              { name: '홍길동', role: '작업책임자', health: '양호' }
+            ],
+            createdAt: new Date().toISOString()
+          }];
+          const sampleRisk = [{
+            id: 'RISK-SAMPLE-01',
+            siteName: 'lg유플러스 유선통신공사(관로/선로)- 제주권',
+            processName: '통신관로 및 접속공사',
+            workName: '맨홀 관로 접속 및 차량 유도 작업',
+            evalDate: new Date().toISOString().slice(0, 10),
+            evaluator: '홍길동 (작업책임자)',
+            supervisor: '안전관리자',
+            items: [
+              { step: '맨홀 개방 및 가스측정', hazard: '유해가스(황화수소, 일산화탄소) 질식 및 산소결핍', currentLevel: '상', measure: '복합가스농도측정기 측정, 환기팬 송풍 30분 이상 가동', afterLevel: '하', manager: '홍길동', status: '완료' },
+              { step: '도로변 차량 유도', hazard: '주행차량 충돌 및 작업자 협착', currentLevel: '상', measure: '신호수 배치, 칼라콘 50m 전방 선제 배치, 신호봉 및 야광조끼 착용', afterLevel: '하', manager: '박민우', status: '완료' }
+            ],
+            createdAt: new Date().toISOString()
+          }];
+          localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(sampleTbm));
+          localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(sampleRisk));
+        }
+      };
+    }
+
+    // 자체 내장 경량 QR 렌더러
+    function renderSimpleQRCode(targetElement, text, size = 180) {
+      if (!targetElement) return;
+      const encoded = encodeURIComponent(text);
+      const url1 = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}`;
+      const url2 = `https://quickchart.io/qr?size=${size}&text=${encoded}`;
+
+      targetElement.innerHTML = `
+        <div style="display:inline-block; padding:12px; background:white; border:2px solid #0f172a; border-radius:8px; text-align:center; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+          <img src="${url1}" alt="QR Code" width="${size}" height="${size}" 
+               onerror="if (!this.dataset.tried) { this.dataset.tried = '1'; this.src = '${url2}'; } else { this.parentElement.innerHTML = '<div style=\\'width:${size}px;height:${size}px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;font-size:11px;padding:8px;word-break:break-all;\\'><strong>[접속 주소]</strong><br>${text}</div>'; }"
+               style="display:block; margin:0 auto;" />
+          <div style="margin-top:8px; font-size:11.5px; font-weight:700; color:#1e293b;">스마트폰 카메라로 스캔하세요</div>
+        </div>
+      `;
+    }
+
+    // 자체 내장 토스트
+    function showToast(message) {
+      let toast = document.getElementById('global-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'global-toast';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#0f172a;color:white;padding:10px 18px;border-radius:8px;font-size:0.9rem;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+
+    // 배너 상시 노출 QR 전환 함수
+    function toggleBannerQr() {
+      const img = document.getElementById('banner-qr-img');
+      const title = document.getElementById('banner-qr-title');
+      const btn = document.getElementById('btn-banner-switch');
+      if (bannerCurrentTarget === 'tbm.html') {
+        bannerCurrentTarget = 'risk.html';
+        const url = `${GITHUB_PAGES_BASE}risk.html`;
+        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(url)}`;
+        title.textContent = '[ 위험성평가표 작성 QR ]';
+        btn.textContent = 'TBM QR로 전환';
+      } else {
+        bannerCurrentTarget = 'tbm.html';
+        const url = `${GITHUB_PAGES_BASE}tbm.html`;
+        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(url)}`;
+        title.textContent = '[ TBM 일지 작성 QR ]';
+        btn.textContent = '위험성평가 QR';
+      }
+    }
 
     async function checkServerStatus() {
       const isGithub = window.location.hostname.includes('github.io');
@@ -485,10 +695,16 @@
 
     function openQrModal(targetFile = 'tbm.html') {
       currentTargetFile = targetFile;
-      document.getElementById('qr-modal').classList.add('active');
+      const modal = document.getElementById('qr-modal');
+      if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+      }
 
-      document.getElementById('tab-tbm').classList.toggle('active', targetFile === 'tbm.html');
-      document.getElementById('tab-risk').classList.toggle('active', targetFile === 'risk.html');
+      const tabTbm = document.getElementById('tab-tbm');
+      const tabRisk = document.getElementById('tab-risk');
+      if (tabTbm) tabTbm.classList.toggle('active', targetFile === 'tbm.html');
+      if (tabRisk) tabRisk.classList.toggle('active', targetFile === 'risk.html');
 
       // 항상 GitHub Pages 모드를 기본으로 적용
       setConnectionMode('github');
@@ -496,8 +712,10 @@
 
     function switchQrTab(targetFile) {
       currentTargetFile = targetFile;
-      document.getElementById('tab-tbm').classList.toggle('active', targetFile === 'tbm.html');
-      document.getElementById('tab-risk').classList.toggle('active', targetFile === 'risk.html');
+      const tabTbm = document.getElementById('tab-tbm');
+      const tabRisk = document.getElementById('tab-risk');
+      if (tabTbm) tabTbm.classList.toggle('active', targetFile === 'tbm.html');
+      if (tabRisk) tabRisk.classList.toggle('active', targetFile === 'risk.html');
       updateQrCode();
     }
 
@@ -516,8 +734,20 @@
     }
 
     function closeQrModal() {
-      document.getElementById('qr-modal').classList.remove('active');
+      const modal = document.getElementById('qr-modal');
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      }
     }
+
+    // 모달 배경 클릭 시 닫기
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('qr-modal');
+      if (modal && e.target === modal) {
+        closeQrModal();
+      }
+    });
 
     function copyQrLink() {
       navigator.clipboard.writeText(currentQrFullUrl).then(() => {

@@ -248,6 +248,22 @@
 
   <script src="common.js"></script>
   <script>
+    if (typeof window.SafetyDB === 'undefined') {
+      window.SafetyDB = {
+        getTbmList() {
+          try {
+            const data = localStorage.getItem('safety_tbm_records_v1');
+            return data ? JSON.parse(data) : [];
+          } catch(e) { return []; }
+        },
+        getTbmById(id) {
+          return this.getTbmList().find(item => item.id === id);
+        },
+        seedSampleData() {},
+        async pullFromServer() { return false; }
+      };
+    }
+
     const DEFAULT_QUESTIONS = [
       "작업 조건과 작업 범위에 대해 검토했는가?",
       "해당 NW_작업안전가이드를 검토했는가?",

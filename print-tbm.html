@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TBM 일지 (위험예지활동) A4 인쇄</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    /* 상단 인쇄 툴바 (화면 전용) */
+    .print-toolbar {
+      background: #0f172a;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-lg);
+    }
+    .print-toolbar .info {
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    /* 10대 수칙 안내 박스 (인쇄용) */
+    .guideline-print-box {
+      border: 1px solid #000;
+      padding: 6px 10px;
+      margin-bottom: 8px;
+      font-size: 8pt;
+      line-height: 1.5;
+      background: #fafafa;
+    }
+    .guideline-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px 14px;
+    }
+    .guideline-grid div {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 14개 점검 체크리스트 인쇄 테이블 */
+    .checklist-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1.5px solid #000;
+      margin-bottom: 8px;
+      font-size: 8pt;
+    }
+    .checklist-table th, .checklist-table td {
+      border: 1px solid #000;
+      padding: 4px 6px;
+      vertical-align: middle;
+    }
+    .checklist-table th {
+      background: #f1f5f9;
+      font-weight: 700;
+      text-align: center;
+    }
+    .chk-result-box {
+      display: inline-flex;
+      gap: 8px;
+      font-weight: 700;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 서명부 그리드 */
+    .worker-sig-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid #000;
+      border-left: 1px solid #000;
+    }
+    .worker-sig-cell {
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
+      padding: 4px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .worker-sig-img {
+      height: 34px;
+      max-width: 90%;
+      object-fit: contain;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body style="background:#e2e8f0; padding-bottom:40px;">
+
+  <!-- 상단 컨트롤 툴바 (인쇄 시 자동 숨김) -->
+  <div class="print-toolbar no-print">
+    <div class="info">
+      <span style="font-weight:700;">📄 TBM 일지 (위험예지활동) A4 인쇄 미리보기</span>
+      <span style="font-size:0.8rem; background:#334155; padding:2px 8px; border-radius:4px;">A4 규격 최적화</span>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-accent btn-sm" onclick="window.print()">🖨️ A4 인쇄 / PDF 저장</button>
+      <a href="index.html" class="btn btn-secondary btn-sm">대시보드로 이동</a>
+    </div>
+  </div>
+
+  <!-- A4 인쇄 공식 문서 영역 -->
+  <div class="container" style="max-width:210mm; margin:16px auto; padding:0;">
+    <div class="print-page" id="print-content">
+
+      <!-- 1. 문서 헤더 및 4단 결재란 -->
+      <div class="doc-header-box">
+        <div class="doc-title-area">
+          <h1 class="doc-main-title">TBM 일지 (위험예지활동)</h1>
+          <div class="doc-sub-info">
+            산업안전보건법 및 NW 작업안전가이드 관련 현장 작업 전 기록부
+          </div>
+        </div>
+        <!-- 4단 결재란 -->
+        <div class="approval-box">
+          <div class="approval-title-col">결재</div>
+          <div class="approval-item">
+            <div class="approval-role">작업책임자</div>
+            <div class="approval-sign" id="appr-creator">서명</div>
+          </div>
+          <div class="approval-item">
+            <div class="approval-role">안전관리자</div>
+            <div class="approval-sign" id="appr-safety">인</div>
+          </div>
+          <div class="approval-item">
+            <div class="approval-role">관리감독자</div>
+            <div class="approval-sign" id="appr-supervisor">인</div>
+          </div>
+          <div class="approval-item">
+            <div class="approval-role">현장대리인</div>
+            <div class="approval-sign" id="appr-manager">인</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 기본 작업 정보 -->
+      <table class="official-table">
+        <colgroup>
+          <col style="width: 14%;">
+          <col style="width: 42%;">
+          <col style="width: 14%;">
+          <col style="width: 30%;">
+        </colgroup>
+        <tbody>
+          <tr>
+            <th>공사명</th>
+            <td id="view-siteName" class="text-bold">lg유플러스 유선통신공사(관로/선로)- 제주권</td>
+            <th>TBM 일자</th>
+            <td id="view-date">-</td>
+          </tr>
+          <tr>
+            <th>공종명</th>
+            <td id="view-workType" class="text-bold">접속작업, 차량유도</td>
+            <th>TBM 일시</th>
+            <td id="view-time">-</td>
+          </tr>
+          <tr>
+            <th>작업 장소</th>
+            <td id="view-location">-</td>
+            <th>작업책임자</th>
+            <td id="view-leaderName">-</td>
+          </tr>
+          <tr>
+            <th>작업 인원</th>
+            <td colspan="3"><span id="view-workerCount" class="text-bold">-</span> 명</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 3. 잠재 위험에 대한 안전수칙 및 대책 (10대 수칙 안내사항) -->
+      <div style="font-size:8.5pt; font-weight:700; margin-bottom:4px;">
+        ■ 잠재 위험에 대한 안전수칙 및 대책 (작업 전 숙지 안내사항)
+      </div>
+      <div class="guideline-print-box">
+        <div class="guideline-grid">
+          <div>1. 현장 작업시 안전모, 안전화 등을 항상 착용한다.</div>
+          <div>6. 기계·장비 등은 담당자 외에는 절대 조작하지 않는다.</div>
+          <div>2. 작업용 공기구 및 건설장비는 작업 전에 반드시 점검한다.</div>
+          <div>7. 작업 순서 및 방법을 준수하고, 무리한 작업을 금지한다.</div>
+          <div>3. 모든 작업은 작업책임자의 지시에 따르며, 단독 작업을 금지한다.</div>
+          <div>8. 작업중 불필요한 행동 및 불안전한 행동을 금지한다.</div>
+          <div>4. 작업 전 작업구간 확인 및 안전시설물 설치 후 작업한다.</div>
+          <div>9. 작업 종료 후 공구 및 자재 정리·정돈 위험요인을 제거한다.</div>
+          <div>5. 고소작업 시 안전벨트 착용 및 안전고리 체결을 점검한다.</div>
+          <div>10. 중량물은 2인 1조로 안전하게 운반한다.</div>
+        </div>
+      </div>
+
+      <!-- 4. 점검사항 (체크리스트 14문항) -->
+      <div style="font-size:8.5pt; font-weight:700; margin:6px 0 4px 0;">
+        ■ 점검사항 (체크리스트)
+      </div>
+      <table class="checklist-table">
+        <colgroup>
+          <col style="width: 5%;">
+          <col style="width: 45%;">
+          <col style="width: 50%;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>점검 항목</th>
+            <th>점검 결과 (여 / 부)</th>
+          </tr>
+        </thead>
+        <tbody id="view-checklist-tbody">
+          <!-- JS 렌더링 (14개 항목) -->
+        </tbody>
+      </table>
+
+      <!-- 5. 특이사항 및 안전전달사항 -->
+      <table class="official-table">
+        <tbody>
+          <tr>
+            <th style="width: 14%;">특이사항 및<br>안전전달사항</th>
+            <td id="view-specialInstructions" style="line-height:1.5; padding:6px 8px; font-size:8pt;">-</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 6. 참석 근로자 서명부 -->
+      <div style="font-size:8.5pt; font-weight:700; margin:8px 0 4px 2px;">
+        ■ 회의 참석자 명단 및 서명부 (총 <span id="view-sig-count">0</span>명)
+      </div>
+      <div class="worker-sig-grid" id="view-sig-grid">
+        <!-- JS 동적 서명 카드 -->
+      </div>
+
+      <!-- 하단 공문서 표시 -->
+      <div style="text-align:right; font-size:7pt; color:#666; margin-top:6px;">
+        * 본 일지는 산업안전보건법 및 LG유플러스 NW 작업안전가이드에 의거하여 작성·보관됩니다. (출력일시: <span id="print-time"></span>)
+      </div>
+
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    const DEFAULT_QUESTIONS = [
+      "작업 조건과 작업 범위에 대해 검토했는가?",
+      "해당 NW_작업안전가이드를 검토했는가?",
+      "공구 사용법에 대해 논의 했는가?",
+      "사용되는 장비 및 공구의 이상 유무를 확인했는가?",
+      "작업전 보호구 및 안전장비의 이상 유무를 확인했는가?",
+      "유해·위험요인에 대해 조치를 실시하였는가?",
+      "작업계획서를 작성하고 내용을 검토했는가?",
+      "안전장구류 착용상태는 양호한가?",
+      "작업자의 건강상태는 양호한가?",
+      "위험성평가 내용을 전파하였는가?",
+      "잠재위험 및 안전대책에 대해 전파하였는가?",
+      "근로자의 작업중지권에 대해 설명했는가?",
+      "작업구역 내 정리·정돈 상태는 양호한가?",
+      "비상연락망 및 비상시 응급조치 절차를 숙지하였는가?"
+    ];
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('print-time').textContent = new Date().toLocaleString('ko-KR');
+
+      if (typeof SafetyDB !== 'undefined') {
+        await SafetyDB.pullFromServer();
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+
+      let record = null;
+      if (id) {
+        record = SafetyDB.getTbmById(id);
+      }
+
+      if (!record) {
+        const list = SafetyDB.getTbmList();
+        if (list.length > 0) record = list[0];
+      }
+
+      if (!record) {
+        SafetyDB.seedSampleData();
+        record = SafetyDB.getTbmList()[0];
+      }
+
+      renderPrintView(record);
+    });
+
+    function renderPrintView(r) {
+      document.getElementById('view-siteName').textContent = r.siteName || 'lg유플러스 유선통신공사(관로/선로)- 제주권';
+      document.getElementById('view-workType').textContent = r.workType || '접속작업, 차량유도';
+      document.getElementById('view-date').textContent = r.date || '-';
+      document.getElementById('view-time').textContent = r.time || '-';
+      document.getElementById('view-location').textContent = r.location || '-';
+      document.getElementById('view-leaderName').textContent = r.leaderName || '-';
+
+      const count = r.workers ? r.workers.length : (r.workerCount || 0);
+      document.getElementById('view-workerCount').textContent = count;
+      document.getElementById('view-sig-count').textContent = count;
+
+      if (r.leaderName) {
+        document.getElementById('appr-creator').innerHTML = `${r.leaderName.split(' ')[0]}<br><span style="font-size:7pt;color:#1e3a8a;">(서명완료)</span>`;
+      }
+
+      // 14개 점검 체크리스트 렌더링
+      const tbody = document.getElementById('view-checklist-tbody');
+      let items = r.checklistItems;
+
+      if (!items || items.length === 0) {
+        items = DEFAULT_QUESTIONS.map((q, idx) => ({
+          no: idx + 1,
+          question: q,
+          result: '여'
+        }));
+      }
+
+      tbody.innerHTML = items.map((item, idx) => {
+        const qText = item.question || DEFAULT_QUESTIONS[idx] || `점검항목 ${idx+1}`;
+        const isYeo = item.result === '여' || item.result === true || !item.result;
+        return `
+          <tr>
+            <td style="text-align:center; font-weight:700;">${idx + 1}</td>
+            <td style="font-weight:600;">${qText}</td>
+            <td style="text-align:center;">
+              <span class="chk-result-box">
+                <span>${isYeo ? '☑' : '☐'} 여 (적합)</span>
+                <span style="color:#666;">/</span>
+                <span>${!isYeo ? '☑' : '☐'} 부 (부적합)</span>
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('view-specialInstructions').textContent = r.specialInstructions || '관로 작업 전 산소 및 유해가스 농도 측정 철저, 도로변 작업 시 신호수 배치 및 안전삼각대·칼라콘 설치 철저.';
+
+      // 참석자 서명 그리드
+      const sigGrid = document.getElementById('view-sig-grid');
+      if (r.workers && r.workers.length > 0) {
+        sigGrid.innerHTML = r.workers.map(w => `
+          <div class="worker-sig-cell">
+            <div style="font-size:7.5pt; font-weight:700;">${w.name} <span style="font-weight:normal; font-size:7pt; color:#555;">(${w.role})</span></div>
+            ${w.sign ? `<img src="${w.sign}" class="worker-sig-img" alt="서명">` : `<div style="height:34px; display:flex; align-items:center; font-size:7.5pt; color:#aaa;">서명</div>`}
+            <div style="font-size:6.5pt; color:#16a34a;">확인: ${w.health || '양호'}</div>
+          </div>
+        `).join('');
+      } else {
+        sigGrid.innerHTML = `<div style="grid-column:1/-1; padding:12px; text-align:center; font-size:8pt; color:#888;">참석자 서명 정보가 없습니다.</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

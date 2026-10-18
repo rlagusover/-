@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>작업 전 위험성평가표 모바일 작성</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #0f172a;
+      --danger: #dc2626;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --border: #cbd5e1;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif; }
+    body { background-color: var(--gray-100); color: var(--gray-800); line-height: 1.5; }
+    .navbar { background-color: var(--secondary); color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .navbar .logo { font-size: 1.1rem; font-weight: 700; color: white; text-decoration: none; }
+    .mobile-container { max-width: 640px; margin: 12px auto; padding: 0 12px; }
+    .card { background: white; border-radius: var(--radius); border: 1px solid var(--border); padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08); }
+    .card-header { border-bottom: 2px solid var(--gray-100); padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 1.15rem; font-weight: 700; color: var(--gray-800); }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    label { font-size: 0.85rem; font-weight: 600; color: var(--gray-700); }
+    label.required::after { content: " *"; color: var(--danger); }
+    input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--gray-300); border-radius: 6px; font-size: 0.95rem; background: white; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-weight: 700; border-radius: 6px; border: none; cursor: pointer; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+    .btn-lg { padding: 14px 20px; font-size: 1.1rem; width: 100%; }
+    .risk-step-card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+    .level-select { padding: 4px 8px; font-weight: 700; border-radius: 4px; }
+    .level-select.high { background: #fee2e2; color: #dc2626; border: 1px solid #f87171; }
+    .level-select.mid { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+    .level-select.low { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .signature-box { border: 2px dashed var(--gray-300); border-radius: 6px; background: #ffffff; position: relative; text-align: center; margin-top: 8px; }
+    .signature-canvas { width: 100%; height: 150px; touch-action: none; display: block; }
+    .signature-placeholder { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #94a3b8; pointer-events: none; font-size: 0.95rem; font-weight: 600; }
+    .signature-tools { display: flex; justify-content: flex-end; padding: 6px 10px; background: var(--gray-50); border-top: 1px solid var(--gray-200); }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="logo">
+      <span>🛡️ 위험성평가표 작성</span>
+    </a>
+    <a href="index.html" class="btn btn-secondary btn-sm" style="color:white; background:rgba(255,255,255,0.2);">관리자 홈</a>
+  </header>
+
+  <main class="mobile-container">
+    <form id="risk-form" onsubmit="handleRiskSubmit(event)">
+
+      <!-- 공종별 템플릿 선택 -->
+      <div class="card" style="background:#fdf4ff; border-color:#f5d0fe;">
+        <label style="color:#86198f; margin-bottom:8px; display:block; font-weight:700;">⚡ 공종별 추천 템플릿</label>
+        <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:6px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="applyRiskPreset('골조공사')">골조/철근</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="applyRiskPreset('비계작업')">비계/고소</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="applyRiskPreset('양중작업')">양중/크레인</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="applyRiskPreset('전기배관')">배관/전기</button>
+        </div>
+      </div>
+
+      <!-- 기본 정보 -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">1. 평가 기본 정보</h3>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="required" for="siteName">현장명</label>
+            <input type="text" id="siteName" required value="판교 제2테크노밸리 복합업무시설 신축공사">
+          </div>
+          <div class="form-group">
+            <label class="required" for="processName">공종 구분</label>
+            <input type="text" id="processName" required value="골조공사">
+          </div>
+          <div class="form-group">
+            <label class="required" for="workName">세부 단위작업명</label>
+            <input type="text" id="workName" required value="5층 슬래브 거푸집 및 철근 배근 작업">
+          </div>
+          <div class="form-group">
+            <label class="required" for="evalDate">평가 일자</label>
+            <input type="date" id="evalDate" required>
+          </div>
+          <div class="form-group">
+            <label class="required" for="evaluator">평가자 (관리감독자)</label>
+            <input type="text" id="evaluator" required value="김현철 (반장)">
+          </div>
+          <div class="form-group">
+            <label for="supervisor">확인자 (안전관리자)</label>
+            <input type="text" id="supervisor" value="박상현 (안전관리자)">
+          </div>
+        </div>
+      </div>
+
+      <!-- 작업단계별 위험요인 및 감소대책 -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">2. 유해·위험요인 및 감소대책</h3>
+            <span style="font-size:0.75rem; color:#64748b;">고용노동부 3단계(상·중·하) 기준 준용</span>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addRiskStepRow()">+ 작업단계 추가</button>
+        </div>
+        <div id="risk-steps-container"></div>
+      </div>
+
+      <!-- 평가자 서명 -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">3. 평가자(관리감독자) 서명</h3>
+        </div>
+        <p style="font-size:0.8rem; color:#64748b; margin-bottom:8px;">
+          본 위험성평가 내용을 작업 전 근로자에게 주지시키고 안전대책을 이행할 것을 확인합니다.
+        </p>
+        <div class="signature-box">
+          <canvas id="eval-signature-canvas" class="signature-canvas"></canvas>
+          <div id="eval-signature-placeholder" class="signature-placeholder">화면에 평가자 서명을 입력하세요</div>
+          <div class="signature-tools">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="evalSignPad.clear()">다시 쓰기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 제출 버튼 -->
+      <div style="margin-bottom:40px;">
+        <button type="submit" class="btn btn-primary btn-lg">
+          ✅ 위험성평가표 제출 완료 (저장)
+        </button>
+      </div>
+
+    </form>
+  </main>
+
+  <script src="common.js"></script>
+  <script>
+    class LocalSignaturePad {
+      constructor(canvas, placeholder) {
+        this.canvas = canvas;
+        this.placeholder = placeholder;
+        this.ctx = canvas.getContext('2d');
+        this.isDrawing = false;
+        this.hasDrawn = false;
+        this.init();
+      }
+
+      init() {
+        this.resize();
+        const getPos = (e) => {
+          const rect = this.canvas.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          return { x: clientX - rect.left, y: clientY - rect.top };
+        };
+
+        const start = (e) => {
+          e.preventDefault();
+          this.isDrawing = true;
+          this.hasDrawn = true;
+          if (this.placeholder) this.placeholder.style.display = 'none';
+          const pos = getPos(e);
+          this.ctx.beginPath();
+          this.ctx.moveTo(pos.x, pos.y);
+        };
+
+        const move = (e) => {
+          if (!this.isDrawing) return;
+          e.preventDefault();
+          const pos = getPos(e);
+          this.ctx.lineTo(pos.x, pos.y);
+          this.ctx.stroke();
+        };
+
+        const end = (e) => {
+          if (!this.isDrawing) return;
+          this.isDrawing = false;
+          this.ctx.closePath();
+        };
+
+        this.canvas.addEventListener('mousedown', start);
+        this.canvas.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', end);
+
+        this.canvas.addEventListener('touchstart', start, { passive: false });
+        this.canvas.addEventListener('touchmove', move, { passive: false });
+        this.canvas.addEventListener('touchend', end);
+      }
+
+      resize() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        const rect = this.canvas.getBoundingClientRect();
+        if (rect.width === 0) return;
+        this.canvas.width = rect.width * ratio;
+        this.canvas.height = (rect.height || 150) * ratio;
+        this.ctx.scale(ratio, ratio);
+        this.ctx.strokeStyle = '#0f172a';
+        this.ctx.lineWidth = 3;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+      }
+
+      clear() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.hasDrawn = false;
+        if (this.placeholder) this.placeholder.style.display = 'block';
+      }
+
+      isEmpty() { return !this.hasDrawn; }
+      toDataURL() { return this.isEmpty() ? null : this.canvas.toDataURL('image/png'); }
+    }
+
+    let evalSignPad = null;
+    document.getElementById('evalDate').value = new Date().toISOString().slice(0, 10);
+
+    const RISK_PRESETS = {
+      '골조공사': [
+        { step: '자재 반입 및 인양', hazard: '크레인 양중 중 와이어로프 체결 불량으로 철근 다발 낙하', curr: '상', measure: '2줄 걸이 샤클 체결 및 수평 확인, 하부 반경 20m 신호수 통제선 설치', after: '하', manager: '정성훈(신호수)' },
+        { step: '슬래브 단부 거푸집 조립', hazard: '외측 단부 안전난간 미설치 상태에서 작업 중 18m 추락', curr: '상', measure: '수평 구명줄 선행 설치 후 안전대 2중 걸이 체결, 수직보호망 조기 시공', after: '하', manager: '박준성(목공팀장)' },
+        { step: '철근 결속 작업', hazard: '돌출 철근에 찔림 및 전도 시 찰과상', curr: '중', measure: '철근 단부 보호캡 100% 장착 및 통로 확보, 보안경 착용', after: '하', manager: '이민호(철근반장)' }
+      ],
+      '비계작업': [
+        { step: '비계 자재 운반', hazard: '중량 파이프 운반 중 요통 및 전도', curr: '중', measure: '2인 1조 운반, 통로 장애물 제거', after: '하', manager: '김철수' },
+        { step: '고소 비계 조립', hazard: '작업발판 미고정 상태에서 이동 중 추락', curr: '상', measure: '발판 틈새 3cm 이하 밀착 설치 및 안전대 체결 철저', after: '하', manager: '박영희' }
+      ],
+      '양중작업': [
+        { step: '자재 슬링벨트 체결', hazard: '슬링벨트 손상으로 양중물 낙하', curr: '상', measure: '작업 전 슬링벨트 마모 및 파손 점검, 정격하중 준수', after: '하', manager: '최진호' }
+      ],
+      '전기배관': [
+        { step: '배관 용접 작업', hazard: '용접 불티로 인한 화재 및 유해가스 흡입', curr: '상', measure: '불티방지포 및 소화기 2대 비치, 방진마스크 착용', after: '하', manager: '이승우' }
+      ]
+    };
+
+    function applyRiskPreset(key) {
+      const items = RISK_PRESETS[key];
+      if (!items) return;
+      const c = document.getElementById('risk-steps-container');
+      c.innerHTML = '';
+      items.forEach(it => addRiskStepRow(it.step, it.hazard, it.curr, it.measure, it.after, it.manager));
+    }
+
+    function addRiskStepRow(step = '', hazard = '', curr = '상', measure = '', after = '하', manager = '') {
+      const c = document.getElementById('risk-steps-container');
+      const rid = 'risk-' + Date.now() + Math.random().toString(36).substr(2, 4);
+      const div = document.createElement('div');
+      div.className = 'risk-step-card';
+      div.id = rid;
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <input type="text" class="risk-step-input" value="${step}" placeholder="단위 작업단계" style="font-weight:700; width:70%;" required>
+          <button type="button" class="btn btn-danger btn-sm" style="padding:2px 8px;" onclick="document.getElementById('${rid}').remove()">삭제</button>
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label style="font-size:0.8rem; color:#dc2626;">⚠️ 유해·위험요인</label>
+          <textarea class="risk-hazard-input" rows="2" required>${hazard}</textarea>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
+          <div>
+            <label style="font-size:0.75rem;">현재 위험성:</label>
+            <select class="risk-curr-select level-select ${curr === '상' ? 'high' : (curr === '중' ? 'mid' : 'low')}" onchange="updateSelectClass(this)">
+              <option value="상" ${curr === '상' ? 'selected' : ''}>상 (위험)</option>
+              <option value="중" ${curr === '중' ? 'selected' : ''}>중 (보통)</option>
+              <option value="하" ${curr === '하' ? 'selected' : ''}>하 (경미)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.75rem;">개선 후 위험성:</label>
+            <select class="risk-after-select level-select ${after === '상' ? 'high' : (after === '중' ? 'mid' : 'low')}" onchange="updateSelectClass(this)">
+              <option value="상" ${after === '상' ? 'selected' : ''}>상 (위험)</option>
+              <option value="중" ${after === '중' ? 'selected' : ''}>중 (보통)</option>
+              <option value="하" ${after === '하' ? 'selected' : ''}>하 (허용 가능)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label style="font-size:0.8rem; color:#1e3a8a;">🛡️ 안전보건 감소대책</label>
+          <textarea class="risk-measure-input" rows="2" required>${measure}</textarea>
+        </div>
+        <div class="form-group">
+          <label style="font-size:0.8rem;">조치 담당자</label>
+          <input type="text" class="risk-manager-input" value="${manager}">
+        </div>
+      `;
+      c.appendChild(div);
+    }
+
+    function updateSelectClass(sel) {
+      sel.classList.remove('high', 'mid', 'low');
+      if (sel.value === '상') sel.classList.add('high');
+      else if (sel.value === '중') sel.classList.add('mid');
+      else sel.classList.add('low');
+    }
+
+    function handleRiskSubmit(e) {
+      e.preventDefault();
+      const cards = document.querySelectorAll('.risk-step-card');
+      if (cards.length === 0) { alert('최소 1개 이상의 작업단계를 추가해주세요.'); return; }
+
+      const items = [];
+      cards.forEach(c => {
+        items.push({
+          step: c.querySelector('.risk-step-input').value.trim(),
+          hazard: c.querySelector('.risk-hazard-input').value.trim(),
+          currentLevel: c.querySelector('.risk-curr-select').value,
+          measure: c.querySelector('.risk-measure-input').value.trim(),
+          afterLevel: c.querySelector('.risk-after-select').value,
+          manager: c.querySelector('.risk-manager-input').value.trim(),
+          status: '조치완료'
+        });
+      });
+
+      const riskRecord = {
+        id: 'RISK-' + Date.now(),
+        siteName: document.getElementById('siteName').value.trim(),
+        processName: document.getElementById('processName').value.trim(),
+        workName: document.getElementById('workName').value.trim(),
+        evalDate: document.getElementById('evalDate').value,
+        evaluator: document.getElementById('evaluator').value.trim(),
+        supervisor: document.getElementById('supervisor').value.trim(),
+        evaluatorSign: evalSignPad.toDataURL(),
+        items: items,
+        createdAt: new Date().toISOString()
+      };
+
+      if (typeof SafetyDB !== 'undefined') {
+        SafetyDB.saveRisk(riskRecord);
+      } else {
+        try {
+          const stored = localStorage.getItem('safety_risk_records_v1');
+          const list = stored ? JSON.parse(stored) : [];
+          list.unshift(riskRecord);
+          localStorage.setItem('safety_risk_records_v1', JSON.stringify(list));
+        } catch (err) {}
+      }
+
+      alert('위험성평가표가 제출되었습니다!\n인쇄 화면으로 이동합니다.');
+      window.location.href = 'print-risk.html?id=' + riskRecord.id;
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (typeof SafetyDB !== 'undefined') {
+        await SafetyDB.pullFromServer();
+      }
+      const canvas = document.getElementById('eval-signature-canvas');
+      const ph = document.getElementById('eval-signature-placeholder');
+      evalSignPad = new LocalSignaturePad(canvas, ph);
+      applyRiskPreset('골조공사');
+    });
+  </script>
+</body>
+</html>

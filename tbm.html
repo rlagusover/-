@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TBM 일지 (위험예지활동) 모바일 작성</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1d4ed8;
+      --secondary: #0f172a;
+      --accent: #f59e0b;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --border: #cbd5e1;
+      --radius: 8px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif; }
+    body { background-color: var(--gray-100); color: var(--gray-800); line-height: 1.5; }
+    .navbar { background-color: var(--secondary); color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .navbar .logo { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 700; color: white; text-decoration: none; }
+    .mobile-container { max-width: 680px; margin: 12px auto; padding: 0 12px; }
+    .card { background: white; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 18px; margin-bottom: 16px; }
+    .card-header { border-bottom: 2px solid var(--gray-100); padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .card-title { font-size: 1.15rem; font-weight: 700; color: var(--gray-800); display: flex; align-items: center; gap: 6px; }
+    .section-badge { background: var(--primary); color: white; font-size: 0.75rem; padding: 2px 7px; border-radius: 4px; }
+    
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    label { font-size: 0.85rem; font-weight: 600; color: var(--gray-700); }
+    label.required::after { content: " *"; color: var(--danger); }
+    input[type="text"], input[type="date"], select, textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--gray-300); border-radius: 6px; font-size: 0.95rem; background: white;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15); }
+    
+    /* 10대 안전수칙 안내 박스 */
+    .guideline-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid var(--primary);
+      border-radius: 6px;
+      padding: 14px 16px;
+    }
+    .guideline-list {
+      padding-left: 18px;
+      font-size: 0.85rem;
+      color: #334155;
+      line-height: 1.75;
+    }
+    .guideline-list li { margin-bottom: 4px; }
+
+    /* 14개 점검 체크리스트 스타일 */
+    .check-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--gray-200);
+      gap: 12px;
+    }
+    .check-item-row:last-child { border-bottom: none; }
+    .check-item-row:nth-child(even) { background-color: var(--gray-50); }
+    .check-num { font-weight: 700; color: var(--primary); width: 24px; font-size: 0.9rem; flex-shrink: 0; }
+    .check-question { font-size: 0.9rem; font-weight: 600; color: var(--gray-800); flex: 1; }
+    .check-buttons { display: flex; gap: 8px; flex-shrink: 0; }
+    
+    .btn-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .btn-yeo {
+      border: 1px solid var(--gray-300);
+      background: white;
+      color: var(--gray-700);
+    }
+    .btn-yeo.checked {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 2px 4px rgba(30, 58, 138, 0.25);
+    }
+    .btn-bu {
+      border: 1px solid var(--gray-300);
+      background: white;
+      color: var(--gray-700);
+    }
+    .btn-bu.checked {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);
+    }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-weight: 700; border-radius: 6px; border: none; cursor: pointer; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-accent { background: var(--accent); color: var(--secondary); }
+    .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+    .btn-lg { padding: 14px 20px; font-size: 1.1rem; width: 100%; }
+    
+    .signature-box { border: 2px dashed var(--gray-300); border-radius: 6px; background: #ffffff; position: relative; text-align: center; margin-top: 8px; }
+    .signature-canvas { width: 100%; height: 160px; touch-action: none; display: block; }
+    .signature-placeholder { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #94a3b8; pointer-events: none; font-size: 0.95rem; font-weight: 600; }
+    .signature-tools { display: flex; justify-content: flex-end; padding: 6px 10px; background: var(--gray-50); border-top: 1px solid var(--gray-200); }
+    
+    .worker-card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; padding: 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .sig-preview { height: 38px; max-width: 100px; object-fit: contain; border: 1px solid var(--gray-200); border-radius: 4px; background: white; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.active { display: flex; }
+    .modal-window { background: white; border-radius: 10px; max-width: 480px; width: 100%; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--secondary); color: white; padding: 10px 18px; border-radius: 8px; font-size: 0.9rem; z-index: 200; opacity: 0; transition: all 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(-5px); }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="logo">
+      <span>🛡️ TBM 일지 (위험예지활동)</span>
+    </a>
+    <a href="index.html" class="btn btn-secondary btn-sm" style="color:white; background:rgba(255,255,255,0.2);">관리자 홈</a>
+  </header>
+
+  <main class="mobile-container">
+    <form id="tbm-form" onsubmit="handleTbmSubmit(event)">
+
+      <!-- 1. 기본 정보 입력 -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><span class="section-badge">1</span>기본 정보</h3>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="required" for="siteName">공사명</label>
+            <input type="text" id="siteName" required value="lg유플러스 유선통신공사(관로/선로)- 제주권">
+          </div>
+          <div class="form-group full-width">
+            <label class="required" for="workType">공종명</label>
+            <input type="text" id="workType" required value="접속작업, 차량유도" placeholder="예: 접속작업, 차량유도">
+          </div>
+          <div class="form-group">
+            <label class="required" for="date">TBM 일자</label>
+            <input type="date" id="date" required>
+          </div>
+          <div class="form-group">
+            <label class="required" for="time">TBM 일시 (시간)</label>
+            <input type="text" id="time" value="08:00 ~ 08:20" placeholder="예: 08:00 ~ 08:20">
+          </div>
+          <div class="form-group">
+            <label class="required" for="location">작업 장소 / 구간</label>
+            <input type="text" id="location" required value="제주 관로 및 선로 작업구간">
+          </div>
+          <div class="form-group">
+            <label class="required" for="leaderName">작업책임자 (진행자)</label>
+            <input type="text" id="leaderName" required value="홍길동 (작업책임자)" placeholder="성명 및 직책">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 잠재 위험에 대한 안전수칙 및 대책 (작업 전 숙지 안내사항) -->
+      <div class="card" style="border-top:3px solid var(--primary);">
+        <div class="card-header">
+          <h3 class="card-title">
+            <span>📢 잠재 위험에 대한 안전수칙 및 대책</span>
+          </h3>
+          <span style="font-size:0.75rem; background:#e0e7ff; color:#3730a3; padding:2px 8px; border-radius:4px; font-weight:700;">작업 전 숙지사항</span>
+        </div>
+        <div class="guideline-box">
+          <ol class="guideline-list">
+            <li><strong>현장 작업시 안전모, 안전화 등을 항상 착용한다.</strong></li>
+            <li><strong>작업용 공기구 및 건설장비는 작업 전에 반드시 점검한다.</strong></li>
+            <li><strong>모든 작업은 작업책임자의 지시에 따르며, 단독 작업을 금지한다.</strong></li>
+            <li><strong>작업 전 작업구간을 확인하고, 작업에 필요한 안전시설물을 설치한 후 작업을 실시한다.</strong></li>
+            <li><strong>고소작업 시 안전벨트 착용 및 안전고리 체결 여부를 점검하고, 미착용·미체결자는 작업을 금지한다.</strong></li>
+            <li><strong>기계·장비 등은 담당자 외에는 절대 조작하지 않는다.</strong></li>
+            <li><strong>작업 순서 및 방법을 준수하고, 무리한 작업을 금지한다.</strong></li>
+            <li><strong>작업중 불필요한 행동 및 불안전한 행동을 금지한다.</strong></li>
+            <li><strong>작업 종료 후 공구 및 자재를 정리·정돈하여 주변 위험요인을 제거한다.</strong></li>
+            <li><strong>중량물은 2인 1조로 안전하게 운반한다.</strong></li>
+          </ol>
+        </div>
+        <div style="font-size:0.75rem; color:#64748b; margin-top:6px; text-align:right;">
+          * 위 10대 안전수칙을 작업 참여자 전원에게 전파하고 숙지 완료하였습니다.
+        </div>
+      </div>
+
+      <!-- 3. 점검사항 (체크리스트 14문항 - 네모칸 여/부 체크) -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title"><span class="section-badge">2</span>점검사항 (체크리스트)</h3>
+            <span style="font-size:0.75rem; color:#64748b;">항목별 여(적합) 또는 부(부적합) 체크</span>
+          </div>
+          <div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="setAllChecklist('여')">⚡ 전체 '여' 선택</button>
+          </div>
+        </div>
+
+        <div id="checklist-container" style="border:1px solid var(--gray-200); border-radius:6px; overflow:hidden;">
+          <!-- 14개 문항 JS 동적 생성 -->
+        </div>
+
+        <!-- 특이사항 및 전달사항 -->
+        <div class="form-group" style="margin-top:14px;">
+          <label for="specialInstructions">📢 특이사항 및 안전전달사항</label>
+          <textarea id="specialInstructions" rows="2">"관로 작업 전 가스농도 측정 철저, 도로변 작업 시 신호수 배치 및 안전삼각대·칼라콘 설치 철저!"</textarea>
+        </div>
+      </div>
+
+      <!-- 4. 참석 근로자 전자서명 -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><span class="section-badge">3</span>참석 근로자 전자서명</h3>
+          <button type="button" class="btn btn-accent btn-sm" onclick="openSignatureModal()">
+            ✍️ 근로자 서명 추가
+          </button>
+        </div>
+        <p style="font-size:0.8rem; color:var(--gray-600); margin-bottom:10px;">
+          TBM에 참여한 작업자별로 화면 터치를 통해 수기 서명을 등록합니다.
+        </p>
+        <div id="worker-list-container">
+          <div id="empty-workers-msg" style="text-align:center; padding:14px; color:#94a3b8; font-size:0.85rem;">
+            등록된 근로자가 없습니다. [✍️ 근로자 서명 추가] 버튼을 눌러 서명하세요.
+          </div>
+        </div>
+      </div>
+
+      <!-- 제출 버튼 -->
+      <div style="margin-bottom:40px;">
+        <button type="submit" class="btn btn-primary btn-lg">
+          ✅ TBM 일지 제출 완료 (저장)
+        </button>
+      </div>
+
+    </form>
+  </main>
+
+  <!-- 서명 팝업 모달 -->
+  <div class="modal-overlay" id="sign-modal">
+    <div class="modal-window">
+      <h3 style="margin-bottom:10px;">참석 근로자 서명</h3>
+      <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:10px;">
+        <div class="form-group">
+          <label class="required" for="modal-worker-name">근로자 성명</label>
+          <input type="text" id="modal-worker-name" placeholder="성명">
+        </div>
+        <div class="form-group">
+          <label for="modal-worker-role">직종 / 담당</label>
+          <input type="text" id="modal-worker-role" placeholder="예: 접속공, 차량유도원">
+        </div>
+      </div>
+
+      <label class="required">전자 서명 (화면에 손가락으로 서명하세요)</label>
+      <div class="signature-box">
+        <canvas id="modal-signature-canvas" class="signature-canvas"></canvas>
+        <div id="modal-signature-placeholder" class="signature-placeholder">여기에 서명하세요</div>
+        <div class="signature-tools">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="clearModalSignature()">다시 쓰기</button>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+        <button type="button" class="btn btn-secondary" onclick="closeSignatureModal()">취소</button>
+        <button type="button" class="btn btn-primary" onclick="saveWorkerSignature()">서명 확인 및 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="global-toast" class="toast"></div>
+
+  <!-- 공통 스크립트 모듈 -->
+  <script src="common.js"></script>
+
+  <!-- 스크립트 -->
+  <script>
+    // 14개 점검 질문 목록
+    const CHECKLIST_QUESTIONS = [
+      "작업 조건과 작업 범위에 대해 검토했는가?",
+      "해당 NW_작업안전가이드를 검토했는가?",
+      "공구 사용법에 대해 논의 했는가?",
+      "사용되는 장비 및 공구의 이상 유무를 확인했는가?",
+      "작업전 보호구 및 안전장비의 이상 유무를 확인했는가?",
+      "유해·위험요인에 대해 조치를 실시하였는가?",
+      "작업계획서를 작성하고 내용을 검토했는가?",
+      "안전장구류 착용상태는 양호한가?",
+      "작업자의 건강상태는 양호한가?",
+      "위험성평가 내용을 전파하였는가?",
+      "잠재위험 및 안전대책에 대해 전파하였는가?",
+      "근로자의 작업중지권에 대해 설명했는가?",
+      "작업구역 내 정리·정돈 상태는 양호한가?",
+      "비상연락망 및 비상시 응급조치 절차를 숙지하였는가?"
+    ];
+
+    // 각 질문별 선택 상태 (기본값: 모두 '여')
+    let checklistResults = new Array(CHECKLIST_QUESTIONS.length).fill('여');
+
+    function renderChecklist() {
+      const container = document.getElementById('checklist-container');
+      container.innerHTML = CHECKLIST_QUESTIONS.map((q, idx) => `
+        <div class="check-item-row">
+          <div class="check-num">${idx + 1}.</div>
+          <div class="check-question">${q}</div>
+          <div class="check-buttons">
+            <div class="btn-toggle btn-yeo ${checklistResults[idx] === '여' ? 'checked' : ''}" 
+                 onclick="setCheckItem(${idx}, '여')">
+              ☑ 여
+            </div>
+            <div class="btn-toggle btn-bu ${checklistResults[idx] === '부' ? 'checked' : ''}" 
+                 onclick="setCheckItem(${idx}, '부')">
+              ☐ 부
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setCheckItem(idx, val) {
+      checklistResults[idx] = val;
+      renderChecklist();
+    }
+
+    function setAllChecklist(val) {
+      checklistResults.fill(val);
+      renderChecklist();
+      showToast(`전체 항목이 '${val}'(으)로 일괄 선택되었습니다.`);
+    }
+
+    // 캔버스 터치 서명 모듈
+    class LocalSignaturePad {
+      constructor(canvas, placeholder) {
+        this.canvas = canvas;
+        this.placeholder = placeholder;
+        this.ctx = canvas.getContext('2d');
+        this.isDrawing = false;
+        this.hasDrawn = false;
+        this.init();
+      }
+
+      init() {
+        this.resize();
+        const getPos = (e) => {
+          const rect = this.canvas.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          return { x: clientX - rect.left, y: clientY - rect.top };
+        };
+
+        const start = (e) => {
+          e.preventDefault();
+          this.isDrawing = true;
+          this.hasDrawn = true;
+          if (this.placeholder) this.placeholder.style.display = 'none';
+          const pos = getPos(e);
+          this.ctx.beginPath();
+          this.ctx.moveTo(pos.x, pos.y);
+        };
+
+        const move = (e) => {
+          if (!this.isDrawing) return;
+          e.preventDefault();
+          const pos = getPos(e);
+          this.ctx.lineTo(pos.x, pos.y);
+          this.ctx.stroke();
+        };
+
+        const end = (e) => {
+          if (!this.isDrawing) return;
+          this.isDrawing = false;
+          this.ctx.closePath();
+        };
+
+        this.canvas.addEventListener('mousedown', start);
+        this.canvas.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', end);
+
+        this.canvas.addEventListener('touchstart', start, { passive: false });
+        this.canvas.addEventListener('touchmove', move, { passive: false });
+        this.canvas.addEventListener('touchend', end);
+        this.canvas.addEventListener('touchcancel', end);
+      }
+
+      resize() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        const rect = this.canvas.getBoundingClientRect();
+        if (rect.width === 0) return;
+        this.canvas.width = rect.width * ratio;
+        this.canvas.height = (rect.height || 160) * ratio;
+        this.ctx.scale(ratio, ratio);
+        this.ctx.strokeStyle = '#0f172a';
+        this.ctx.lineWidth = 3;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+      }
+
+      clear() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.hasDrawn = false;
+        if (this.placeholder) this.placeholder.style.display = 'block';
+      }
+
+      isEmpty() { return !this.hasDrawn; }
+      toDataURL() { return this.isEmpty() ? null : this.canvas.toDataURL('image/png'); }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('global-toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    let sigPad = null;
+    let registeredWorkers = [];
+
+    document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+
+    function openSignatureModal() {
+      document.getElementById('modal-worker-name').value = '';
+      document.getElementById('modal-worker-role').value = '';
+      const m = document.getElementById('sign-modal');
+      m.classList.add('active');
+
+      if (!sigPad) {
+        const canvas = document.getElementById('modal-signature-canvas');
+        const ph = document.getElementById('modal-signature-placeholder');
+        sigPad = new LocalSignaturePad(canvas, ph);
+      } else {
+        sigPad.clear();
+        sigPad.resize();
+      }
+    }
+
+    function closeSignatureModal() {
+      document.getElementById('sign-modal').classList.remove('active');
+    }
+
+    function clearModalSignature() {
+      if (sigPad) sigPad.clear();
+    }
+
+    function saveWorkerSignature() {
+      const name = document.getElementById('modal-worker-name').value.trim();
+      const role = document.getElementById('modal-worker-role').value.trim() || '작업원';
+      if (!name) { alert('근로자 성명을 입력해주세요.'); return; }
+      if (sigPad.isEmpty()) { alert('화면에 서명을 작성해주세요.'); return; }
+
+      registeredWorkers.push({ name, role, health: '양호', sign: sigPad.toDataURL() });
+      renderWorkers();
+      closeSignatureModal();
+      showToast(`${name} 님 서명 완료`);
+    }
+
+    function removeWorker(idx) {
+      registeredWorkers.splice(idx, 1);
+      renderWorkers();
+    }
+
+    function renderWorkers() {
+      const c = document.getElementById('worker-list-container');
+      if (registeredWorkers.length === 0) {
+        c.innerHTML = `<div id="empty-workers-msg" style="text-align:center; padding:14px; color:#94a3b8; font-size:0.85rem;">등록된 근로자가 없습니다. [✍️ 근로자 서명 추가] 버튼을 눌러 서명하세요.</div>`;
+        return;
+      }
+      c.innerHTML = registeredWorkers.map((w, i) => `
+        <div class="worker-card">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <img src="${w.sign}" alt="서명" class="sig-preview">
+            <div>
+              <div style="font-weight:700; font-size:0.95rem;">${w.name} <span style="font-size:0.8rem; color:#64748b;">(${w.role})</span></div>
+              <div style="font-size:0.75rem; color:#16a34a;">● 확인상태 ${w.health}</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" style="color:#ef4444;" onclick="removeWorker(${i})">삭제</button>
+        </div>
+      `).join('');
+    }
+
+    function handleTbmSubmit(e) {
+      e.preventDefault();
+
+      // 14개 점검 질문과 결과 묶기
+      const checklistData = CHECKLIST_QUESTIONS.map((q, idx) => ({
+        no: idx + 1,
+        question: q,
+        result: checklistResults[idx]
+      }));
+
+      const tbmRecord = {
+        id: 'TBM-' + Date.now(),
+        siteName: document.getElementById('siteName').value.trim(),
+        workType: document.getElementById('workType').value.trim(),
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value.trim(),
+        location: document.getElementById('location').value.trim(),
+        leaderName: document.getElementById('leaderName').value.trim(),
+        workerCount: registeredWorkers.length || 1,
+        checklistItems: checklistData,
+        specialInstructions: document.getElementById('specialInstructions').value.trim(),
+        workers: registeredWorkers,
+        createdAt: new Date().toISOString()
+      };
+
+      if (typeof SafetyDB !== 'undefined') {
+        SafetyDB.saveTbm(tbmRecord);
+      } else {
+        try {
+          const stored = localStorage.getItem('safety_tbm_records_v1');
+          const list = stored ? JSON.parse(stored) : [];
+          list.unshift(tbmRecord);
+          localStorage.setItem('safety_tbm_records_v1', JSON.stringify(list));
+        } catch (err) {}
+      }
+
+      alert('TBM 일지(위험예지활동)가 제출되었습니다!\n관리자 인쇄 화면으로 이동합니다.');
+      window.location.href = 'print-tbm.html?id=' + tbmRecord.id;
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (typeof SafetyDB !== 'undefined') {
+        await SafetyDB.pullFromServer();
+      }
+      renderChecklist();
+    });
+  </script>
+</body>
+</html>

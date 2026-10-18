@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>작업 전 위험성평가표 A4 인쇄</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .print-toolbar {
+      background: #0f172a;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-lg);
+    }
+    .print-toolbar .info {
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body style="background:#e2e8f0; padding-bottom:40px;">
+
+  <!-- 상단 컨트롤 툴바 (인쇄 시 자동 숨김) -->
+  <div class="print-toolbar no-print">
+    <div class="info">
+      <span style="font-weight:700;">📄 고용노동부 표준 위험성평가표 인쇄 미리보기</span>
+      <span style="font-size:0.8rem; background:#334155; padding:2px 8px; border-radius:4px;">A4 규격 최적화</span>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-accent btn-sm" onclick="window.print()">🖨️ A4 인쇄 / PDF 저장</button>
+      <a href="index.html" class="btn btn-secondary btn-sm">대시보드로 이동</a>
+    </div>
+  </div>
+
+  <!-- A4 인쇄 공식 문서 영역 -->
+  <div class="container" style="max-width:210mm; margin:20px auto; padding:0;">
+    <div class="print-page" id="print-content">
+
+      <!-- 1. 문서 헤더 및 결재란 -->
+      <div class="doc-header-box">
+        <div class="doc-title-area">
+          <h1 class="doc-main-title">작업 전 위험성평가표</h1>
+          <div class="doc-sub-info">
+            사업장 위험성평가에 관한 지침(고용노동부고시 제2023-19호) 준용
+          </div>
+        </div>
+        <div class="approval-box">
+          <div class="approval-title-col">결재</div>
+          <div class="approval-item">
+            <div class="approval-role">평가자(감독자)</div>
+            <div class="approval-sign" id="appr-evaluator">서명</div>
+          </div>
+          <div class="approval-item">
+            <div class="approval-role">안전관리자</div>
+            <div class="approval-sign" id="appr-safety">인</div>
+          </div>
+          <div class="approval-item">
+            <div class="approval-role">현장소장</div>
+            <div class="approval-sign" id="appr-manager">인</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 기본 정보 -->
+      <table class="official-table">
+        <colgroup>
+          <col style="width: 14%;">
+          <col style="width: 36%;">
+          <col style="width: 14%;">
+          <col style="width: 36%;">
+        </colgroup>
+        <tbody>
+          <tr>
+            <th>공사(현장)명</th>
+            <td id="view-siteName" class="text-bold">-</td>
+            <th>평가 일자</th>
+            <td id="view-evalDate">-</td>
+          </tr>
+          <tr>
+            <th>공종 구분</th>
+            <td id="view-processName">-</td>
+            <th>세부 작업명</th>
+            <td id="view-workName" class="text-bold">-</td>
+          </tr>
+          <tr>
+            <th>평가자(관리감독자)</th>
+            <td id="view-evaluator">-</td>
+            <th>확인자(안전관리자)</th>
+            <td id="view-supervisor">-</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 3. 고용노동부 3단계 위험성평가표 -->
+      <table class="official-table">
+        <colgroup>
+          <col style="width: 5%;">
+          <col style="width: 16%;">
+          <col style="width: 28%;">
+          <col style="width: 8%;">
+          <col style="width: 29%;">
+          <col style="width: 8%;">
+          <col style="width: 6%;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th rowspan="2">순번</th>
+            <th rowspan="2">작업단계</th>
+            <th rowspan="2">유해·위험요인 (파악)</th>
+            <th>현재 위험성</th>
+            <th rowspan="2">위험성 감소대책 (개선계획)</th>
+            <th>개선후 위험성</th>
+            <th rowspan="2">조치<br>확인</th>
+          </tr>
+          <tr>
+            <th>상·중·하</th>
+            <th>상·중·하</th>
+          </tr>
+        </thead>
+        <tbody id="view-risk-tbody">
+          <!-- JS 렌더링 -->
+        </tbody>
+      </table>
+
+      <!-- 4. 평가자 서명 확인란 -->
+      <div style="border:1px solid #000; padding:10px; margin-top:14px; background:#fcfcfc;">
+        <div style="font-size:9pt; font-weight:700; margin-bottom:6px;">■ 평가 및 주지 결과 확인</div>
+        <p style="font-size:8.5pt; line-height:1.5; color:#333;">
+          상기 위험성평가 결과에 대하여 작업 시작 전 TBM(작업 전 안전점검회의)을 통해 당일 작업에 참여하는 모든 근로자에게 
+          유해·위험요인 및 안전보건 조치사항을 빠짐없이 전달 및 주지시켰으며, 개선대책 이행 여부를 현장에서 철저히 확인하였습니다.
+        </p>
+        <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-top:10px;">
+          <span style="font-size:8.5pt; font-weight:700;">평가자(관리감독자) 확인 서명:</span>
+          <div id="eval-sign-box" style="height:44px; min-width:100px; display:flex; align-items:center; justify-content:center;">
+            <!-- 서명 이미지 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 공문서 표시 -->
+      <div style="text-align:right; font-size:7.5pt; color:#666; margin-top:8px;">
+        * 본 위험성평가표는 산업안전보건법 제36조에 따라 3년간 보존 의무가 있습니다. (출력일시: <span id="print-time"></span>)
+      </div>
+
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('print-time').textContent = new Date().toLocaleString('ko-KR');
+
+      if (typeof SafetyDB !== 'undefined') {
+        await SafetyDB.pullFromServer();
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+
+      let record = null;
+      if (id) {
+        record = SafetyDB.getRiskById(id);
+      }
+
+      if (!record) {
+        const list = SafetyDB.getRiskList();
+        if (list.length > 0) record = list[0];
+      }
+
+      if (!record) {
+        alert('조회 가능한 위험성평가표가 없습니다. 샘플 데이터를 로드합니다.');
+        SafetyDB.seedSampleData();
+        record = SafetyDB.getRiskList()[0];
+      }
+
+      renderRiskPrint(record);
+    });
+
+    function renderRiskPrint(r) {
+      document.getElementById('view-siteName').textContent = r.siteName || '-';
+      document.getElementById('view-processName').textContent = r.processName || '-';
+      document.getElementById('view-workName').textContent = r.workName || '-';
+      document.getElementById('view-evalDate').textContent = r.evalDate || '-';
+      document.getElementById('view-evaluator').textContent = r.evaluator || '-';
+      document.getElementById('view-supervisor').textContent = r.supervisor || '-';
+
+      if (r.evaluator) {
+        document.getElementById('appr-evaluator').innerHTML = `${r.evaluator.split(' ')[0]}<br><span style="font-size:7.5pt;color:#1e3a8a;">(서명완료)</span>`;
+      }
+
+      const tbody = document.getElementById('view-risk-tbody');
+      if (r.items && r.items.length > 0) {
+        tbody.innerHTML = r.items.map((item, idx) => `
+          <tr>
+            <td class="center">${idx + 1}</td>
+            <td style="font-weight:700;">${item.step}</td>
+            <td>${item.hazard}</td>
+            <td class="center" style="font-weight:700; ${item.currentLevel === '상' ? 'color:#dc2626;' : ''}">${item.currentLevel}</td>
+            <td>
+              ${item.measure}
+              ${item.manager ? `<div style="font-size:7.5pt; color:#555; margin-top:2px;">[담당: ${item.manager}]</div>` : ''}
+            </td>
+            <td class="center" style="font-weight:700; color:#16a34a;">${item.afterLevel}</td>
+            <td class="center" style="font-weight:700; color:#16a34a;">완료</td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = `<tr><td colspan="7" class="center">평가 항목이 없습니다.</td></tr>`;
+      }
+
+      if (r.evaluatorSign) {
+        document.getElementById('eval-sign-box').innerHTML = `<img src="${r.evaluatorSign}" style="max-height:42px;" alt="서명">`;
+      } else {
+        document.getElementById('eval-sign-box').innerHTML = `<span style="font-size:8pt; color:#666;">(서명 생략)</span>`;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -428,11 +428,22 @@ const FIREBASE_CONFIG = {
   appId: "1:645604750807:web:2a4f662b24b53290a7c792"
 };
 let firebaseDb = null;
-let firebaseReady = Promise.resolve(false);
-try {
-  if (window.firebase && !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-  if (window.firebase) { firebaseDb = firebase.firestore(); firebaseReady = Promise.resolve(true); }
-} catch (err) { console.error('Firebase 초기화 실패:', err); }
+let firebaseReady = (async function () {
+  try {
+    if (!window.firebase) throw new Error('Firebase SDK를 불러오지 못했습니다.');
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebaseDb = firebase.firestore();
+    // Firestore 규칙의 request.auth != null 조건을 충족하도록 익명 로그인
+    if (!firebase.auth().currentUser) {
+      await firebase.auth().signInAnonymously();
+    }
+    return !!firebase.auth().currentUser;
+  } catch (err) {
+    console.error('Firebase 인증/초기화 실패:', err);
+    if (typeof showToast === 'function') showToast('Firebase 인증 실패: Authentication 익명 로그인을 확인하세요.');
+    return false;
+  }
+})();
 
 const _originalDeleteTbm = SafetyDB.deleteTbm.bind(SafetyDB);
 const _originalDeleteRisk = SafetyDB.deleteRisk.bind(SafetyDB);

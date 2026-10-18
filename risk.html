@@ -304,7 +304,7 @@
       else sel.classList.add('low');
     }
 
-    function handleRiskSubmit(e) {
+    async function handleRiskSubmit(e) {
       e.preventDefault();
       const cards = document.querySelectorAll('.risk-step-card');
       if (cards.length === 0) { alert('최소 1개 이상의 작업단계를 추가해주세요.'); return; }
@@ -337,6 +337,11 @@
 
       if (typeof SafetyDB !== 'undefined') {
         SafetyDB.saveRisk(riskRecord);
+        const synced = await SafetyDB.syncToServer();
+        if (!synced) {
+          alert('공용 저장소 저장에 실패했습니다. 제출을 중단합니다. 다시 시도해 주세요.');
+          return;
+        }
       } else {
         try {
           const stored = localStorage.getItem('safety_risk_records_v1');

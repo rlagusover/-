@@ -493,7 +493,7 @@
       `).join('');
     }
 
-    function handleTbmSubmit(e) {
+    async function handleTbmSubmit(e) {
       e.preventDefault();
 
       // 14개 점검 질문과 결과 묶기
@@ -520,6 +520,11 @@
 
       if (typeof SafetyDB !== 'undefined') {
         SafetyDB.saveTbm(tbmRecord);
+        const synced = await SafetyDB.syncToServer();
+        if (!synced) {
+          alert('공용 저장소 저장에 실패했습니다. 제출을 중단합니다. 다시 시도해 주세요.');
+          return;
+        }
       } else {
         try {
           const stored = localStorage.getItem('safety_tbm_records_v1');

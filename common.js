@@ -54,7 +54,6 @@ const SafetyDB = {
       }
     }
     localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(list));
-    this.syncToServer();
     return tbmData;
   },
 
@@ -98,7 +97,6 @@ const SafetyDB = {
       }
     }
     localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(list));
-    this.syncToServer();
     return riskData;
   },
 

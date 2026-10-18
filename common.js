@@ -8,6 +8,7 @@
 const GITHUB_PAGES_BASE = 'https://rlagusover.github.io/-/';
 const DEFAULT_LOCAL_IP = '192.168.0.3';
 const DEFAULT_PORT = 8080;
+const SHARED_DB_URL = 'https://script.google.com/macros/s/AKfycby1x6Z2PMPkM_ice2T8YIu1CCuVOLfj5igiXmQxH94t5b3_jieX0tY-0TuCaPtNgqS_vQ/exec';
 
 
 const STORAGE_KEYS = {
@@ -115,48 +116,76 @@ const SafetyDB = {
     this.syncToServer();
   },
 
-  // 로컬 웹 서버와 양방향 동기화
+  // Google Apps Script 공용 저장소와 동기화
   async syncToServer() {
-    if (!window.location.protocol.startsWith('http')) return;
-    if (window.location.hostname.includes('github.io')) return; // GitHub Pages는 정적 호스팅이므로 로컬스토리지 우선
     try {
-      const payload = JSON.stringify({
-        tbm: this.getTbmList(),
-        risk: this.getRiskList(),
-        syncedAt: new Date().toISOString()
-      });
-      await fetch('/api/save-all', {
+      const serverData = await this.requestSharedData();
+      const tbm = this.mergeRecords(serverData.tbm || [], this.getTbmList());
+      const risk = this.mergeRecords(serverData.risk || [], this.getRiskList());
+      localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(tbm));
+      localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(risk));
+      await fetch(SHARED_DB_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: payload
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ tbm, risk })
       });
+      return true;
     } catch (e) {
-      // 서버 미응답 시 로컬 저장소 우선 사용
+      console.error('공용 저장소 동기화 실패:', e);
+      return false;
     }
   },
 
-  // 서버로부터 최신 데이터 불러오기
   async pullFromServer() {
-    if (!window.location.protocol.startsWith('http')) return false;
-    if (window.location.hostname.includes('github.io')) return false; // GitHub Pages는 정적 호스팅이므로 로컬스토리지 우선
     try {
-      const res = await fetch('/api/data');
-      if (res.ok) {
-        const data = await res.json();
-        if (data && (data.tbm || data.risk)) {
-          if (data.tbm && data.tbm.length > 0) {
-            localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(data.tbm));
-          }
-          if (data.risk && data.risk.length > 0) {
-            localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(data.risk));
-          }
-          return true;
-        }
+      const data = await this.requestSharedData();
+      if (!data || !Array.isArray(data.tbm) || !Array.isArray(data.risk)) return false;
+      // 서버 데이터와 현재 기기 데이터를 ID 기준으로 합쳐 데이터 유실을 줄임
+      const tbm = this.mergeRecords(data.tbm, this.getTbmList());
+      const risk = this.mergeRecords(data.risk, this.getRiskList());
+      localStorage.setItem(STORAGE_KEYS.TBM, JSON.stringify(tbm));
+      localStorage.setItem(STORAGE_KEYS.RISK, JSON.stringify(risk));
+      if (tbm.length !== data.tbm.length || risk.length !== data.risk.length) {
+        await fetch(SHARED_DB_URL, {
+          method: 'POST', mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ tbm, risk })
+        });
       }
+      return true;
     } catch (e) {
-      // fetch 실패 시 무시
+      console.error('공용 데이터 불러오기 실패:', e);
+      return false;
     }
-    return false;
+  },
+
+  mergeRecords(serverRecords, localRecords) {
+    const map = new Map();
+    [...serverRecords, ...localRecords].forEach(record => {
+      if (record && record.id) map.set(String(record.id), record);
+    });
+    return [...map.values()].sort((a, b) =>
+      String(b.createdAt || '').localeCompare(String(a.createdAt || ''))
+    );
+  },
+
+  requestSharedData() {
+    return new Promise((resolve, reject) => {
+      const callback = 'safetyDbCallback_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+      const script = document.createElement('script');
+      const timer = setTimeout(() => finish(new Error('공용 데이터 응답 시간 초과')), 15000);
+      const finish = (err, data) => {
+        clearTimeout(timer);
+        delete window[callback];
+        script.remove();
+        if (err) reject(err); else resolve(data);
+      };
+      window[callback] = data => finish(null, data);
+      script.onerror = () => finish(new Error('공용 데이터 연결 실패'));
+      script.src = SHARED_DB_URL + '?callback=' + callback + '&t=' + Date.now();
+      document.head.appendChild(script);
+    });
   },
 
   // 샘플 데이터 생성

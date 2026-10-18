@@ -38,15 +38,24 @@
 
 ---
 
+## 🌐 GitHub Pages 온라인 실시간 접속 주소
+
+스마트폰 또는 PC 웹 브라우저에서 아래 링크를 클릭하거나 QR 코드를 스캔하여 즉시 사용할 수 있습니다 (별도 프로그램 설치 불필요).
+
+- **관리자 메인 대시보드**: [https://rlagusover.github.io/-/](https://rlagusover.github.io/-/)
+- **📱 TBM 일지 (위험예지활동) 모바일 작성**: [https://rlagusover.github.io/-/tbm.html](https://rlagusover.github.io/-/tbm.html)
+- **📋 작업 전 위험성평가 모바일 작성**: [https://rlagusover.github.io/-/risk.html](https://rlagusover.github.io/-/risk.html)
+
+---
+
 ## 🚀 스마트폰 접속 및 사용 방법
 
-### 1단계: 스마트폰 Wi-Fi 연결
-- 스마트폰을 **PC와 동일한 Wi-Fi(공유기)**에 연결합니다.
+### 온라인 사용 (추천 - 어디서나 가능)
+1. 스마트폰 카메라로 대시보드의 **QR 코드**를 비추거나 위 링크로 접속합니다 (LTE/5G/Wi-Fi 무관).
+2. TBM 일지 작성 및 체크리스트(14개 항목)를 점검하고 근로자 수기 전자서명을 등록합니다.
+3. 제출 완료 후 바로 나타나는 **A4 인쇄 미리보기 화면**에서 `🖨️ A4 인쇄 / PDF 저장`을 눌러 저장 및 출력합니다.
 
-### 2단계: 서버 실행
-- `C:\test` 폴더에 있는 [**start_server.bat**](file:///c:/test/start_server.bat) 파일을 **마우스로 더블클릭**합니다.
-- 검은색 서버 창이 열리고 PC 웹 브라우저(`index.html`)가 자동으로 실행됩니다.
-
-### 3단계: 스마트폰으로 QR코드 스캔
-- 화면 상단의 **[📱 TBM QR코드 열기]** 또는 **[📋 위험성평가 QR 열기]** 버튼을 클릭합니다.
-- 스마트폰 카메라로 QR코드를 스캔하면 모바일 작성 화면으로 바로 연결됩니다.
+### 오프라인 로컬 서버 사용 (PC 로컬 환경)
+1. `C:\test` 폴더에 있는 [**start_server.bat**](file:///c:/test/start_server.bat) 파일을 **더블클릭**합니다.
+2. PC 브라우저(`http://localhost:8080/index.html`)가 열리면 상단의 **[📱 TBM QR코드 열기]**를 클릭합니다.
+3. 동일한 Wi-Fi에 연결된 스마트폰으로 스캔하여 접속합니다.

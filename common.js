@@ -5,7 +5,6 @@
  * - 터치/마우스 캔버스 전자서명 패드 엔진
  */
 
-const GITHUB_PAGES_BASE = 'https://rlagusover.github.io/-/';
 const DEFAULT_LOCAL_IP = '192.168.0.3';
 const DEFAULT_PORT = 8080;
 

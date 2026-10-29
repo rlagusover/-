@@ -554,7 +554,6 @@
             }
         }
 
-        /* Pulse animation for new row */
         @keyframes highlightPulse {
             0% { background-color: #fef08a; }
             50% { background-color: #fef9c3; }
@@ -696,7 +695,6 @@
                 </div>
 
                 <form id="tbmInputForm" onsubmit="handleFormSubmit(event)">
-                    <!-- 기본 정보 -->
                     <div class="card">
                         <div class="card-header" style="background: #1e293b; color: white;">
                             <span style="font-weight: 700;">1. 기본 현장 정보</span>
@@ -738,7 +736,6 @@
                         </div>
                     </div>
 
-                    <!-- 10대 안전수칙 -->
                     <div class="card">
                         <div class="card-header" style="background: #334155; color: white;">
                             <span style="font-weight: 700;">2. 잠재 위험에 대한 안전수칙 및 대책 (10대 수칙)</span>
@@ -755,7 +752,6 @@
                         </div>
                     </div>
 
-                    <!-- 14대 점검 체크리스트 -->
                     <div class="card">
                         <div class="card-header" style="background: #1e293b; color: white;">
                             <span style="font-weight: 700;">3. 점검사항 (체크리스트 14개 항목)</span>
@@ -766,7 +762,6 @@
                         <div class="card-body" id="checkItemsContainer" style="padding: 6px 12px;"></div>
                     </div>
 
-                    <!-- 특이사항 및 안전전달사항 -->
                     <div class="card">
                         <div class="card-header" style="background: #1e293b; color: white;">
                             <span style="font-weight: 700;">4. 특이사항 및 안전전달사항</span>
@@ -783,7 +778,6 @@
                         </div>
                     </div>
 
-                    <!-- 참석자 명단 및 서명부 -->
                     <div class="card">
                         <div class="card-header" style="background: #1e293b; color: white;">
                             <span style="font-weight: 700;">5. 회의 참석자 명단 및 서명부</span>
@@ -829,7 +823,6 @@
                 </div>
             </div>
 
-            <!-- A4 Sheet (원본과 100% 동일한 정밀 레이아웃) -->
             <div class="sheet" id="printSheet">
                 <div class="tbm-header">
                     <div style="flex: 1;">
@@ -1021,7 +1014,6 @@
         { no: 14, question: "비상연락망 및 비상시 응급조치 절차를 숙지하였는가?" }
     ];
 
-    // 날짜 도우미 (로컬 타임존 완벽 일치)
     function getTodayString() {
         const d = new Date();
         const year = d.getFullYear();
@@ -1030,49 +1022,17 @@
         return `${year}-${month}-${day}`;
     }
 
-    const SAMPLE_RECORDS = [
-        {
-            id: 1,
-            doc_num: "TBM-20261011-001",
-            project_name: "LG유플러스 유선통신공사(관로/선로)- 제주권",
-            work_type: "접속작업, 차량유도",
-            work_location: "제주 관로 및 선로 작업구간",
-            worker_count: 1,
-            tbm_date: "2026-10-11",
-            tbm_time: "08:00 ~ 08:20",
-            leader_name: "홍길동",
-            special_notes: "관로 작업 전 가스농도 측정 철저, 도로변 작업 시 신호수 배치 및 안전삼각대·칼라콘 설치 철저!",
-            checklist: DEFAULT_CHECKLIST.map(item => ({ ...item, result: 'pass' })),
-            attendees: [
-                {
-                    name: "김현",
-                    role: "안전관리",
-                    status: "양호",
-                    signature: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='70'><path d='M20 50 Q 50 10 70 45 T 120 30' stroke='%23000' stroke-width='2.5' fill='none'/></svg>"
-                }
-            ],
-            approvals: {
-                leader: { name: "홍길동", signed: true, date: "2026-10-11 08:20" },
-                safety_mgr: { name: "", signed: false, date: "" },
-                supervisor: { name: "", signed: false, date: "" },
-                site_rep: { name: "", signed: false, date: "" }
-            },
-            created_at: "2026-10-11 08:20:00"
-        }
-    ];
-
     const CLOUD_DB_URL = 'https://kvdb.io/8vBKZpUGVWciTW6QoXJVBz/tbm_list';
 
     function getStoredRecords() {
         const data = localStorage.getItem('tbm_records_store');
         if (!data) {
-            localStorage.setItem('tbm_records_store', JSON.stringify(SAMPLE_RECORDS));
-            return SAMPLE_RECORDS;
+            return [];
         }
         try {
-            return JSON.parse(data);
+            return JSON.parse(data) || [];
         } catch(e) {
-            return SAMPLE_RECORDS;
+            return [];
         }
     }
 
@@ -1110,8 +1070,8 @@
                 if (Array.isArray(cloudRecords) && cloudRecords.length > 0) {
                     const localRecords = getStoredRecords();
                     const map = new Map();
-                    localRecords.forEach(r => map.set(r.id, r));
-                    cloudRecords.forEach(r => map.set(r.id, r));
+                    localRecords.forEach(r => { if (r && r.id) map.set(r.id, r); });
+                    cloudRecords.forEach(r => { if (r && r.id) map.set(r.id, r); });
 
                     const merged = Array.from(map.values()).sort((a, b) => b.id - a.id);
                     localStorage.setItem('tbm_records_store', JSON.stringify(merged));
@@ -1129,7 +1089,7 @@
         }
 
         if (statusEl) {
-            statusEl.innerText = '🟢 실시간 클라우드 대기';
+            statusEl.innerText = '🟢 실시간 클라우드 연결됨';
             statusEl.style.background = '#def7ec';
             statusEl.style.color = '#03543f';
         }
@@ -1168,19 +1128,54 @@
     // -------------------------------------------------------------
     function renderTable() {
         const records = getStoredRecords();
-        const search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-        const dateFilter = document.getElementById('dateInput').value;
+
+        // 1. 통계 집계 최우선 계산 (테이블 렌더링 에러 여부와 무관하게 100% 안전 계산!)
+        try {
+            const todayStr = getTodayString();
+            const todayCount = records.filter(r => r && r.tbm_date === todayStr).length;
+            const totalCount = records.length;
+            const pendingCount = records.filter(r => {
+                if (!r || !r.approvals) return true;
+                const sc = (r.approvals?.leader?.signed ? 1 : 0) + 
+                           (r.approvals?.safety_mgr?.signed ? 1 : 0) + 
+                           (r.approvals?.supervisor?.signed ? 1 : 0) + 
+                           (r.approvals?.site_rep?.signed ? 1 : 0);
+                return sc < 4;
+            }).length;
+
+            const elTodayDate = document.getElementById('todayDateDisplay');
+            if (elTodayDate) elTodayDate.innerText = `기준일: ${todayStr}`;
+            
+            const elToday = document.getElementById('todayCountDisplay');
+            if (elToday) elToday.innerText = `${todayCount} 건`;
+            
+            const elPending = document.getElementById('pendingCountDisplay');
+            if (elPending) elPending.innerText = `${pendingCount} 건`;
+            
+            const elTotal = document.getElementById('totalCountDisplay');
+            if (elTotal) elTotal.innerText = `${totalCount} 건`;
+        } catch(statErr) {
+            console.error('통계 계산 오류:', statErr);
+        }
+
+        // 2. 검색 & 날짜 필터링
+        const searchInput = document.getElementById('searchInput');
+        const search = (searchInput ? searchInput.value : '').trim().toLowerCase();
+        const dateInput = document.getElementById('dateInput');
+        const dateFilter = dateInput ? dateInput.value : '';
 
         const filtered = records.filter(r => {
+            if (!r) return false;
             if (dateFilter && r.tbm_date !== dateFilter) return false;
             if (search) {
-                const combined = `${r.project_name} ${r.work_location} ${r.leader_name} ${r.work_type}`.toLowerCase();
+                const combined = `${r.project_name || ''} ${r.work_location || ''} ${r.leader_name || ''} ${r.work_type || ''}`.toLowerCase();
                 if (!combined.includes(search)) return false;
             }
             return true;
         });
 
         const tbody = document.getElementById('recordTableBody');
+        if (!tbody) return;
         tbody.innerHTML = '';
 
         if (filtered.length === 0) {
@@ -1192,28 +1187,29 @@
                     tr.className = 'row-highlight';
                 }
 
-                const allPass = r.checklist.every(c => c.result === 'pass');
-                const signedCount = (r.approvals.leader.signed ? 1 : 0) + 
-                                    (r.approvals.safety_mgr.signed ? 1 : 0) + 
-                                    (r.approvals.supervisor.signed ? 1 : 0) + 
-                                    (r.approvals.site_rep.signed ? 1 : 0);
+                const allPass = Array.isArray(r.checklist) ? r.checklist.every(c => c && c.result === 'pass') : true;
+                const appr = r.approvals || {};
+                const signedCount = (appr.leader?.signed ? 1 : 0) + 
+                                    (appr.safety_mgr?.signed ? 1 : 0) + 
+                                    (appr.supervisor?.signed ? 1 : 0) + 
+                                    (appr.site_rep?.signed ? 1 : 0);
 
                 tr.innerHTML = `
-                    <td><strong style="font-family: monospace; color: #475569;">${r.doc_num}</strong></td>
+                    <td><strong style="font-family: monospace; color: #475569;">${r.doc_num || '-'}</strong></td>
                     <td>
-                        <div style="font-weight: 700; color: #0f172a;">${r.project_name}</div>
-                        <div style="font-size: 12px; color: #64748b;">📍 ${r.work_location}</div>
+                        <div style="font-weight: 700; color: #0f172a;">${r.project_name || '-'}</div>
+                        <div style="font-size: 12px; color: #64748b;">📍 ${r.work_location || '-'}</div>
                     </td>
-                    <td><span style="font-size: 13px;">${r.work_type}</span></td>
+                    <td><span style="font-size: 13px;">${r.work_type || '-'}</span></td>
                     <td>
-                        <div style="font-weight: 600;">${r.tbm_date}</div>
-                        <div style="font-size: 11px; color: #64748b;">${r.tbm_time}</div>
+                        <div style="font-weight: 600;">${r.tbm_date || '-'}</div>
+                        <div style="font-size: 11px; color: #64748b;">${r.tbm_time || '-'}</div>
                     </td>
                     <td>
-                        <span style="font-weight: 600;">${r.leader_name}</span>
+                        <span style="font-weight: 600;">${r.leader_name || '-'}</span>
                         <div style="font-size: 11px; color: #16a34a;">(서명완료)</div>
                     </td>
-                    <td style="text-align: center;">${r.worker_count}명</td>
+                    <td style="text-align: center;">${r.worker_count || 1}명</td>
                     <td style="text-align: center;">
                         ${allPass ? '<span class="badge badge-success">전원 적합</span>' : '<span class="badge badge-danger">부적합 유</span>'}
                     </td>
@@ -1231,28 +1227,13 @@
                 tbody.appendChild(tr);
             });
         }
-
-        // 실시간 통계 집계 완벽 반영
-        const todayStr = getTodayString();
-        document.getElementById('todayDateDisplay').innerText = `기준일: ${todayStr}`;
-        document.getElementById('totalCountDisplay').innerText = `${records.length} 건`;
-        
-        const todayCount = records.filter(r => r.tbm_date === todayStr).length;
-        document.getElementById('todayCountDisplay').innerText = `${todayCount} 건`;
-        
-        const pendingCount = records.filter(r => {
-            const sc = (r.approvals.leader.signed ? 1 : 0) + 
-                       (r.approvals.safety_mgr.signed ? 1 : 0) + 
-                       (r.approvals.supervisor.signed ? 1 : 0) + 
-                       (r.approvals.site_rep.signed ? 1 : 0);
-            return sc < 4;
-        }).length;
-        document.getElementById('pendingCountDisplay').innerText = `${pendingCount} 건`;
     }
 
     function resetFilter() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('dateInput').value = '';
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
+        const dateInput = document.getElementById('dateInput');
+        if (dateInput) dateInput.value = '';
         renderTable();
     }
 
@@ -1275,6 +1256,10 @@
         if (!approverName) return;
 
         const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
+        if (!r.approvals) {
+            r.approvals = { leader: { name: r.leader_name || '', signed: true, date: '' } };
+        }
+
         if (role === '1') {
             r.approvals.safety_mgr = { name: approverName, signed: true, date: nowStr };
         } else if (role === '2') {
@@ -1434,7 +1419,7 @@
 
         const dateStr = document.getElementById('inp_tbm_date').value || getTodayString();
         const dateClean = dateStr.replace(/-/g, '');
-        const todayRecords = records.filter(r => r.tbm_date === dateStr);
+        const todayRecords = records.filter(r => r && r.tbm_date === dateStr);
         const doc_num = `TBM-${dateClean}-${String(todayRecords.length + 1).padStart(3, '0')}`;
 
         const attendees = [];
@@ -1499,27 +1484,29 @@
     function openPrintDoc(id) {
         currentPrintDocId = id;
         const records = getStoredRecords();
-        const r = records.find(item => item.id === id) || records[0];
+        const r = records.find(item => item && item.id === id) || records[0];
         if (!r) return;
 
-        document.getElementById('printDocNumHeader').innerText = `${r.doc_num} 인쇄 미리보기`;
+        document.getElementById('printDocNumHeader').innerText = `${r.doc_num || ''} 인쇄 미리보기`;
 
-        document.getElementById('p_project_name').innerText = r.project_name;
-        document.getElementById('p_tbm_date').innerText = r.tbm_date;
-        document.getElementById('p_work_type').innerText = r.work_type;
-        document.getElementById('p_tbm_time').innerText = r.tbm_time;
-        document.getElementById('p_work_location').innerText = r.work_location;
-        document.getElementById('p_leader_name').innerText = `${r.leader_name} (작업책임자)`;
-        document.getElementById('p_worker_count').innerText = `${r.worker_count} 명`;
-        document.getElementById('p_special_notes').innerText = r.special_notes;
+        document.getElementById('p_project_name').innerText = r.project_name || '';
+        document.getElementById('p_tbm_date').innerText = r.tbm_date || '';
+        document.getElementById('p_work_type').innerText = r.work_type || '';
+        document.getElementById('p_tbm_time').innerText = r.tbm_time || '';
+        document.getElementById('p_work_location').innerText = r.work_location || '';
+        document.getElementById('p_leader_name').innerText = `${r.leader_name || ''} (작업책임자)`;
+        document.getElementById('p_worker_count').innerText = `${r.worker_count || 1} 명`;
+        document.getElementById('p_special_notes').innerText = r.special_notes || '';
 
+        const leaderAppr = r.approvals?.leader || {};
         document.getElementById('p_appr_leader').innerHTML = `
-            <div style="font-weight: 700;">${r.approvals.leader.name}</div>
+            <div style="font-weight: 700;">${leaderAppr.name || r.leader_name || ''}</div>
             <div style="font-size: 7.5pt; color: #15803d; font-weight: 600;">(서명완료)</div>
         `;
 
         function renderApprovalCell(cellId, appr) {
             const cell = document.getElementById(cellId);
+            if (!cell) return;
             if (appr && appr.signed) {
                 cell.innerHTML = `
                     <div style="font-weight: 700;">${appr.name || '승인'}</div>
@@ -1529,9 +1516,9 @@
                 cell.innerHTML = `<span style="color: #888;">인</span>`;
             }
         }
-        renderApprovalCell('p_appr_safety', r.approvals.safety_mgr);
-        renderApprovalCell('p_appr_supervisor', r.approvals.supervisor);
-        renderApprovalCell('p_appr_rep', r.approvals.site_rep);
+        renderApprovalCell('p_appr_safety', r.approvals?.safety_mgr);
+        renderApprovalCell('p_appr_supervisor', r.approvals?.supervisor);
+        renderApprovalCell('p_appr_rep', r.approvals?.site_rep);
 
         const rulesBox = document.getElementById('p_rules_box');
         rulesBox.innerHTML = `
@@ -1539,8 +1526,9 @@
             <div>${DEFAULT_RULES.slice(5).map(x => `<div>${x}</div>`).join('')}</div>
         `;
 
+        const checkList = Array.isArray(r.checklist) ? r.checklist : DEFAULT_CHECKLIST;
         const checkTbody = document.getElementById('p_checklist_tbody');
-        checkTbody.innerHTML = r.checklist.map(item => `
+        checkTbody.innerHTML = checkList.map(item => `
             <tr>
                 <td class="col-no">${item.no}</td>
                 <td style="padding-left: 8px; font-weight: 500;">${item.question}</td>
@@ -1552,11 +1540,12 @@
             </tr>
         `).join('');
 
-        document.getElementById('p_attendees_title').innerText = `■ 회의 참석자 명단 및 서명부 (총 ${r.attendees.length}명)`;
+        const attList = Array.isArray(r.attendees) ? r.attendees : [];
+        document.getElementById('p_attendees_title').innerText = `■ 회의 참석자 명단 및 서명부 (총 ${attList.length}명)`;
         const attContainer = document.getElementById('p_attendees_container');
-        attContainer.innerHTML = r.attendees.map(att => `
+        attContainer.innerHTML = attList.map(att => `
             <div class="attendee-card">
-                <div class="attendee-name">${att.name} ${att.role ? `(${att.role})` : ''}</div>
+                <div class="attendee-name">${att.name || ''} ${att.role ? `(${att.role})` : ''}</div>
                 <div class="attendee-sig-box">
                     ${att.signature ? `<img src="${att.signature}" alt="서명">` : '<span style="color:#999; font-size:8pt;">(자필서명)</span>'}
                 </div>
@@ -1580,7 +1569,7 @@
 
     function shareCurrentDoc() {
         const records = getStoredRecords();
-        const r = records.find(item => item.id === currentPrintDocId);
+        const r = records.find(item => item && item.id === currentPrintDocId);
         if (!r) return;
 
         try {
@@ -1611,7 +1600,6 @@
             const baseUrl = window.location.href.split('?')[0].split('#')[0];
             return `${baseUrl}?view=form`;
         } else {
-            // file:/// 일 때
             return `https://rlagusover.github.io/-/?view=form`;
         }
     }
@@ -1681,7 +1669,7 @@
                 const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(shareDoc))));
                 const docObj = JSON.parse(jsonStr);
                 let records = getStoredRecords();
-                if (!records.some(x => x.id === docObj.id || x.doc_num === docObj.doc_num)) {
+                if (!records.some(x => x && (x.id === docObj.id || x.doc_num === docObj.doc_num))) {
                     records.unshift(docObj);
                     saveStoredRecords(records);
                 }
@@ -1701,7 +1689,6 @@
             syncFromCloud();
         }
 
-        // 6초마다 클라우드 자동 동기화 (작업자가 스마트폰으로 제출하면 관리자 화면에 자동 갱신!)
         setInterval(() => {
             syncFromCloud(true);
         }, 6000);

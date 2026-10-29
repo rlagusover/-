@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>스마트 현장 TBM 및 위험예지활동 시스템</title>
     <!-- Pretendard Web Font -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -154,7 +154,7 @@
             justify-content: space-between;
         }
         .stat-label { font-size: 13px; color: #64748b; font-weight: 600; margin-bottom: 4px; }
-        .stat-val { font-size: 28px; font-weight: 900; color: #0f172a; }
+        .stat-val { font-size: 32px; font-weight: 900; color: #0f172a; line-height: 1.1; }
         .stat-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
 
         /* Card */
@@ -226,7 +226,7 @@
             padding: 10px 12px;
             border: 1.5px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
             outline: none;
             background: #fdfdfd;
         }
@@ -253,11 +253,11 @@
         .check-btns { display: flex; gap: 8px; }
         .toggle-btn {
             flex: 1;
-            padding: 8px 12px;
+            padding: 10px 12px;
             text-align: center;
             border-radius: 6px;
             border: 1.5px solid #cbd5e1;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
             background: #fff;
@@ -276,7 +276,7 @@
 
         .tag-btn {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 5px 12px;
             background: #e2e8f0;
             border-radius: 14px;
             font-size: 12px;
@@ -296,7 +296,7 @@
         }
         .sig-canvas {
             width: 100%;
-            height: 120px;
+            height: 130px;
             display: block;
             cursor: crosshair;
         }
@@ -562,6 +562,23 @@
         .row-highlight {
             animation: highlightPulse 3s ease;
         }
+
+        /* Toast notification */
+        #toastNotice {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            display: none;
+            z-index: 1000;
+            font-size: 14px;
+            font-weight: 700;
+            border-left: 5px solid #10b981;
+        }
     </style>
 
     <!-- Inlined Offline-Safe QRCode & SignaturePad Libraries -->
@@ -581,19 +598,21 @@
 <body>
 
     <!-- Header Navigation -->
-    <header class="top-nav no-print">
+    <header class="top-nav no-print" id="mainHeaderNav">
         <div class="nav-inner">
             <a href="javascript:showTab('dashboard')" class="brand-logo">
                 <span class="brand-badge">안전보건</span>
                 <span class="brand-title">스마트 TBM 관리 시스템</span>
             </a>
-            <div class="nav-tabs-btn">
+            <div class="nav-tabs-btn" id="navTabsContainer">
                 <button class="tab-btn active" id="btn-dashboard" onclick="showTab('dashboard')">📋 일지 목록</button>
                 <button class="tab-btn" id="btn-form" onclick="showTab('form')">✍ 새 체크리스트 작성</button>
                 <button class="tab-btn" id="btn-qr" onclick="showTab('qr')">📱 현장 QR 안내판</button>
             </div>
         </div>
     </header>
+
+    <div id="toastNotice"></div>
 
     <main class="container">
 
@@ -642,7 +661,7 @@
                         </span>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button onclick="syncFromCloud()" class="btn btn-outline btn-sm">🔄 지금 새로고침</button>
+                        <button onclick="syncFromCloud(false, true)" class="btn btn-outline btn-sm">🔄 지금 새로고침</button>
                         <button onclick="showTab('qr')" class="btn btn-outline btn-sm">🖨 현장 부착용 QR 인쇄</button>
                         <button onclick="showTab('form')" class="btn btn-primary btn-sm">+ 모바일 체크리스트 작성</button>
                     </div>
@@ -682,7 +701,7 @@
         </section>
 
         <!-- ========================================================= -->
-        <!-- 2. 모바일 체크리스트 작성 폼                                  -->
+        <!-- 2. 모바일 체크리스트 작성 폼 (QR 접속 전용 최적화)             -->
         <!-- ========================================================= -->
         <section id="view-form" class="view-panel">
             <div class="form-container">
@@ -691,7 +710,7 @@
                         <h2 style="font-size: 22px; font-weight: 800; color: #0f172a;">TBM 일지 (위험예지활동) 작성</h2>
                         <p style="font-size: 13px; color: #64748b; margin-top: 2px;">산업안전보건법 및 NW 작업안전가이드 관련 현장 작업 전 기록부</p>
                     </div>
-                    <button onclick="showTab('dashboard')" class="btn btn-outline btn-sm">← 목록으로</button>
+                    <button onclick="showTab('dashboard')" class="btn btn-outline btn-sm" id="formBackToListBtn">← 대시보드로</button>
                 </div>
 
                 <form id="tbmInputForm" onsubmit="handleFormSubmit(event)">
@@ -800,20 +819,41 @@
         </section>
 
         <!-- ========================================================= -->
-        <!-- 3. 원본 100% 일치 A4 인쇄 / PDF 출력 뷰                         -->
+        <!-- 3. 모바일 제출 완료 전용 화면                                 -->
+        <!-- ========================================================= -->
+        <section id="view-success" class="view-panel" style="text-align: center; padding: 40px 16px;">
+            <div style="max-width: 480px; margin: 0 auto; background: white; border-radius: 16px; padding: 36px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 2px solid #86efac;">
+                <div style="font-size: 56px; margin-bottom: 12px;">✅</div>
+                <h2 style="font-size: 24px; font-weight: 900; color: #166534; margin-bottom: 6px;">TBM 제출 완료!</h2>
+                <p style="font-size: 15px; color: #475569; line-height: 1.5; margin-bottom: 20px;">
+                    현장 안전점검 및 자필 서명이 정상 제출되었습니다.<br>
+                    <strong style="color: #1e40af;">관리자 PC 대시보드에 실시간으로 저장되었습니다.</strong>
+                </p>
+                <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 14px; margin-bottom: 24px; font-size: 14px; color: #15803d; text-align: left; line-height: 1.6;">
+                    <div>• 문서번호: <strong id="succDocNum" style="font-family: monospace;">-</strong></div>
+                    <div>• 작업책임자: <strong id="succLeader">-</strong></div>
+                    <div>• 공 사 명: <strong id="succProject">-</strong></div>
+                    <div>• 제출일시: <strong id="succTime">-</strong></div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button onclick="openPrintDoc(newlyAddedDocId)" class="btn btn-primary" style="flex: 1;">📄 원본 인쇄서식 확인</button>
+                    <button onclick="location.href='?view=form'" class="btn btn-outline" style="flex: 1;">+ 추가 일지 작성</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- 4. 원본 100% 일치 A4 인쇄 / PDF 출력 뷰                         -->
         <!-- ========================================================= -->
         <section id="view-print" class="view-panel">
             <div class="print-toolbar no-print">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <button onclick="showTab('dashboard')" class="btn btn-outline btn-sm" style="color: white; border-color: #475569; background: transparent;">
-                        ← 목록으로
+                        ← 대시보드로
                     </button>
                     <span style="color: #38bdf8; font-weight: 700;" id="printDocNumHeader"></span>
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button onclick="shareCurrentDoc()" class="btn btn-outline btn-sm" style="background: #f59e0b; color: #000; font-weight: 700; border: none;">
-                        📲 관리자 카톡/링크 전송
-                    </button>
                     <button onclick="approveCurrentDoc()" class="btn btn-outline btn-sm" style="background: white; color: #1e293b;">
                         관리자 결재(날인)
                     </button>
@@ -907,7 +947,7 @@
         </section>
 
         <!-- ========================================================= -->
-        <!-- 4. 현장 부착용 QR 안내판 (대형 포스터)                          -->
+        <!-- 5. 현장 부착용 QR 안내판 (대형 포스터)                          -->
         <!-- ========================================================= -->
         <section id="view-qr" class="view-panel">
             <div class="print-toolbar no-print">
@@ -1026,9 +1066,7 @@
 
     function getStoredRecords() {
         const data = localStorage.getItem('tbm_records_store');
-        if (!data) {
-            return [];
-        }
+        if (!data) return [];
         try {
             return JSON.parse(data) || [];
         } catch(e) {
@@ -1055,7 +1093,9 @@
         }
     }
 
-    async function syncFromCloud(silent = false) {
+    let previousRecordsCount = 0;
+
+    async function syncFromCloud(silent = false, forceAlert = false) {
         const statusEl = document.getElementById('cloudSyncStatus');
         if (statusEl && !silent) {
             statusEl.innerText = '🔄 동기화 중...';
@@ -1067,13 +1107,20 @@
             const resp = await fetch(CLOUD_DB_URL, { cache: 'no-store' });
             if (resp.ok) {
                 const cloudRecords = await resp.json();
-                if (Array.isArray(cloudRecords) && cloudRecords.length > 0) {
+                if (Array.isArray(cloudRecords)) {
                     const localRecords = getStoredRecords();
                     const map = new Map();
                     localRecords.forEach(r => { if (r && r.id) map.set(r.id, r); });
                     cloudRecords.forEach(r => { if (r && r.id) map.set(r.id, r); });
 
                     const merged = Array.from(map.values()).sort((a, b) => b.id - a.id);
+                    
+                    // 새 일지 도착 감지
+                    if (previousRecordsCount > 0 && merged.length > previousRecordsCount) {
+                        showToast(`🔔 스마트폰에서 새 TBM 일지가 등록되었습니다! (${merged.length - previousRecordsCount}건 추가)`);
+                    }
+                    previousRecordsCount = merged.length;
+
                     localStorage.setItem('tbm_records_store', JSON.stringify(merged));
                     if (statusEl) {
                         statusEl.innerText = '🟢 실시간 클라우드 연결됨';
@@ -1081,6 +1128,7 @@
                         statusEl.style.color = '#03543f';
                     }
                     renderTable();
+                    if (forceAlert) alert(`클라우드에서 최신 일지 ${merged.length}건을 성공적으로 불러왔습니다!`);
                     return;
                 }
             }
@@ -1093,6 +1141,14 @@
             statusEl.style.background = '#def7ec';
             statusEl.style.color = '#03543f';
         }
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toastNotice');
+        if (!t) return;
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 4000);
     }
 
     let currentPrintDocId = 1;
@@ -1179,7 +1235,7 @@
         tbody.innerHTML = '';
 
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 40px; color: #94a3b8;">등록된 일지가 없습니다.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 40px; color: #94a3b8;">등록된 일지가 없습니다. 스마트폰으로 QR을 찍어 작성해 보세요.</td></tr>`;
         } else {
             filtered.forEach(r => {
                 const tr = document.createElement('tr');
@@ -1240,7 +1296,7 @@
     function deleteDoc(id) {
         if (confirm("해당 TBM 일지를 삭제하시겠습니까?")) {
             let records = getStoredRecords();
-            records = records.filter(r => r.id !== id);
+            records = records.filter(r => r && r.id !== id);
             saveStoredRecords(records);
             renderTable();
         }
@@ -1248,7 +1304,7 @@
 
     function approveRecordQuick(id) {
         let records = getStoredRecords();
-        const r = records.find(item => item.id === id);
+        const r = records.find(item => item && item.id === id);
         if (!r) return;
 
         const role = prompt("결재자 직책을 선택하세요:\n1: 안전관리자\n2: 관리감독자\n3: 현장대리인", "1");
@@ -1412,7 +1468,7 @@
         if (attendeePads[id]) attendeePads[id].clear();
     }
 
-    // 체크리스트 제출 -> 대시보드로 이동 & 집계 실시간 갱신!
+    // 체크리스트 제출 -> 클라우드 전송 & 모바일 완료창 띄우기!
     async function handleFormSubmit(e) {
         e.preventDefault();
         const records = getStoredRecords();
@@ -1447,10 +1503,13 @@
         }));
 
         const leader_name = document.getElementById('inp_leader_name').value.trim();
+        const project_name = document.getElementById('inp_project_name').value.trim();
+        const nowTimeStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
         const newRecord = {
             id: Date.now(),
             doc_num: doc_num,
-            project_name: document.getElementById('inp_project_name').value.trim(),
+            project_name: project_name,
             tbm_date: dateStr,
             tbm_time: document.getElementById('inp_tbm_time').value.trim(),
             work_type: document.getElementById('inp_work_type').value.trim(),
@@ -1466,7 +1525,7 @@
                 supervisor: { name: "", signed: false, date: "" },
                 site_rep: { name: "", signed: false, date: "" }
             },
-            created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+            created_at: nowTimeStr
         };
 
         records.unshift(newRecord);
@@ -1474,8 +1533,20 @@
         saveStoredRecords(records, true);
         await syncToCloud(records);
 
-        alert(`✅ TBM 일지가 성공적으로 등록 및 저장되었습니다!\n문서번호: ${doc_num}\n\n관리자 대시보드 목록으로 이동하여 총 집계와 등록 결과를 확인합니다.`);
-        showTab('dashboard');
+        // 완료 정보 채우기
+        document.getElementById('succDocNum').innerText = doc_num;
+        document.getElementById('succLeader').innerText = leader_name;
+        document.getElementById('succProject').innerText = project_name;
+        document.getElementById('succTime').innerText = nowTimeStr;
+
+        // 모바일 작성 모드인 경우 완료 전용 화면으로, PC 작성인 경우 대시보드로 이동
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('view') === 'form') {
+            showTab('success');
+        } else {
+            alert(`✅ TBM 일지가 성공적으로 등록되었습니다!\n문서번호: ${doc_num}\n\n관리자 대시보드 목록으로 이동합니다.`);
+            showTab('dashboard');
+        }
     }
 
     // -------------------------------------------------------------
@@ -1567,41 +1638,11 @@
         openPrintDoc(currentPrintDocId);
     }
 
-    function shareCurrentDoc() {
-        const records = getStoredRecords();
-        const r = records.find(item => item && item.id === currentPrintDocId);
-        if (!r) return;
-
-        try {
-            const jsonStr = JSON.stringify(r);
-            const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(jsonStr))));
-            const baseUrl = window.location.href.split('?')[0].split('#')[0];
-            const shareUrl = `${baseUrl}?shareDoc=${encoded}`;
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    alert("📋 [관리자 전송 링크가 복사되었습니다!]\n\n카카오톡이나 문자로 관리자(소장님)에게 붙여넣기하여 보내시면,\n관리자가 PC에서 클릭 한 번으로 이 일지를 열고 바로 A4 인쇄할 수 있습니다!");
-                }).catch(() => {
-                    prompt("아래 링크를 복사하여 카톡/문자로 관리자에게 전송하세요:", shareUrl);
-                });
-            } else {
-                prompt("아래 링크를 복사하여 카톡/문자로 관리자에게 전송하세요:", shareUrl);
-            }
-        } catch(e) {
-            alert("공유 링크 생성 중 오류: " + e);
-        }
-    }
-
     // -------------------------------------------------------------
     // QR 코드 자동 렌더링 (대시보드 메인 카드 + 대형 포스터 2곳 동시 렌더링!)
     // -------------------------------------------------------------
     function getFormUrl() {
-        if (window.location.protocol.startsWith('http')) {
-            const baseUrl = window.location.href.split('?')[0].split('#')[0];
-            return `${baseUrl}?view=form`;
-        } else {
-            return `https://rlagusover.github.io/-/?view=form`;
-        }
+        return `https://rlagusover.github.io/-/?view=form`;
     }
 
     function renderDashboardQR() {
@@ -1663,25 +1704,14 @@
     // 초기 실행
     window.addEventListener('load', () => {
         const params = new URLSearchParams(window.location.search);
-        const shareDoc = params.get('shareDoc');
-        if (shareDoc) {
-            try {
-                const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(shareDoc))));
-                const docObj = JSON.parse(jsonStr);
-                let records = getStoredRecords();
-                if (!records.some(x => x && (x.id === docObj.id || x.doc_num === docObj.doc_num))) {
-                    records.unshift(docObj);
-                    saveStoredRecords(records);
-                }
-                openPrintDoc(docObj.id);
-                return;
-            } catch(e) {
-                console.error("공유 문서 로드 실패:", e);
-            }
-        }
-
         const view = params.get('view');
+        
         if (view === 'form') {
+            // 모바일 작성 모드: 헤더 탭 메뉴 숨기고 모바일 전용 뷰 제공
+            const navTabs = document.getElementById('navTabsContainer');
+            if (navTabs) navTabs.style.display = 'none';
+            const backBtn = document.getElementById('formBackToListBtn');
+            if (backBtn) backBtn.style.display = 'none';
             showTab('form');
         } else {
             renderTable();
@@ -1689,9 +1719,12 @@
             syncFromCloud();
         }
 
+        // 관리자 대시보드에서는 4초마다 클라우드 자동 동기화 (스마트폰 제출 즉시 실시간 감지!)
         setInterval(() => {
-            syncFromCloud(true);
-        }, 6000);
+            if (!document.getElementById('view-form').classList.contains('active')) {
+                syncFromCloud(true);
+            }
+        }, 4000);
     });
     </script>
 </body>

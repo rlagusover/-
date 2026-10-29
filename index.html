@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>스마트 현장 TBM 및 위험예지활동 시스템</title>
     <!-- Pretendard Web Font -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -535,6 +535,233 @@
             justify-content: space-between;
         }
 
+        /* ========================================================= */
+        /* 스마트폰 화면 최적화 (모바일 반응형 연동 스타일)                */
+        /* ========================================================= */
+        @media screen and (max-width: 768px) {
+            html, body {
+                overflow-x: hidden;
+                -webkit-text-size-adjust: 100%;
+            }
+
+            /* 1. 상단 내비게이션 바 컴팩트화 */
+            .top-nav {
+                box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            }
+            .nav-inner {
+                padding: 8px 12px;
+                gap: 6px;
+            }
+            .brand-badge {
+                font-size: 11px;
+                padding: 2px 6px;
+            }
+            .brand-title {
+                font-size: 15px;
+            }
+            .nav-tabs-btn {
+                width: 100%;
+                display: flex;
+                gap: 4px;
+                margin-top: 4px;
+            }
+            .tab-btn {
+                flex: 1;
+                padding: 6px 4px;
+                font-size: 12px;
+                text-align: center;
+                border-radius: 6px;
+            }
+
+            /* 2. 전체 여백 및 카드 크기 축소 */
+            .container {
+                padding: 0 10px;
+                margin: 10px auto 40px auto;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .card {
+                border-radius: 8px;
+                margin-bottom: 12px;
+                border: 1px solid #cbd5e1;
+            }
+            .card-header {
+                padding: 10px 12px;
+                font-size: 13.5px;
+            }
+            .card-body {
+                padding: 12px 10px;
+            }
+
+            /* 3. 대시보드 통계 카드: 2열 컴팩트 그리드 */
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            .stat-card {
+                padding: 10px 12px;
+                border-radius: 8px;
+            }
+            .stat-label {
+                font-size: 11px;
+                margin-bottom: 2px;
+            }
+            .stat-val {
+                font-size: 20px;
+            }
+            .stat-sub {
+                font-size: 10px;
+                margin-top: 2px;
+            }
+
+            /* 4. 필터 및 검색 바 */
+            .filter-bar-responsive {
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+            .filter-bar-responsive input {
+                width: 100% !important;
+            }
+
+            /* 5. 폼 입력창: 모바일 1열 배치 & 컴팩트 터치 친화적 UI */
+            .form-row {
+                grid-template-columns: 1fr !important;
+                gap: 8px;
+            }
+            .form-group {
+                margin-bottom: 10px;
+            }
+            .form-label {
+                font-size: 12px;
+                font-weight: 700;
+                margin-bottom: 4px;
+                color: #334155;
+            }
+            /* iOS Safari 자동확대 방지: font-size 16px */
+            .form-control {
+                font-size: 16px !important;
+                padding: 8px 10px;
+                border-radius: 6px;
+                border-width: 1.5px;
+                box-sizing: border-box;
+            }
+
+            /* 6. 체크리스트 항목 컴팩트화 */
+            .check-item {
+                padding: 8px 6px;
+                gap: 6px;
+            }
+            .check-q {
+                font-size: 12.5px;
+                line-height: 1.35;
+            }
+            .check-btns {
+                gap: 6px;
+            }
+            .toggle-btn {
+                padding: 8px 4px;
+                font-size: 12px;
+                border-radius: 6px;
+            }
+
+            /* 7. 서명 패드 모바일 최적 크기 */
+            .sig-wrapper {
+                margin-top: 4px;
+                border-radius: 6px;
+            }
+            .sig-canvas {
+                height: 110px !important;
+                width: 100% !important;
+            }
+            .sig-clear-btn {
+                font-size: 11px;
+                padding: 3px 6px;
+                top: 6px;
+                right: 6px;
+            }
+
+            /* 8. 10대 안전수칙 박스 스크롤 최적화 */
+            #rulesListContainer {
+                max-height: 140px;
+                overflow-y: auto;
+                font-size: 12px !important;
+                padding: 8px 10px !important;
+                line-height: 1.5 !important;
+            }
+
+            /* 9. 참석자 카드 */
+            #attendeesListContainer > div {
+                padding: 10px 8px !important;
+                margin-bottom: 10px !important;
+            }
+
+            /* 10. 특이사항 태그 버튼 */
+            .tag-btn {
+                font-size: 11px;
+                padding: 4px 7px;
+                margin: 2px 2px;
+            }
+
+            /* 11. 제출 버튼 */
+            .btn-lg {
+                font-size: 15px;
+                padding: 12px 16px;
+                width: 100%;
+                border-radius: 8px;
+            }
+
+            /* 12. 대시보드 테이블 가로 스크롤 보장 */
+            .table-scroll-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                border-radius: 6px;
+                border: 1px solid var(--border);
+            }
+            .data-table th, .data-table td {
+                padding: 8px 6px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+            /* 13. A4 인쇄 미리보기 & 포스터 가로 스크롤 방어 */
+            #view-print, #view-qr {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 20px;
+            }
+            .sheet, .qr-poster {
+                margin: 0 !important;
+            }
+            .print-toolbar {
+                flex-direction: column;
+                gap: 8px;
+                padding: 10px 12px;
+            }
+            .print-toolbar > div {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            /* 14. 폼 작성 화면 헤더 */
+            .form-header-title {
+                font-size: 18px !important;
+            }
+            .form-header-sub {
+                font-size: 11.5px !important;
+            }
+
+            /* 15. 모바일 완료 화면 */
+            #view-success {
+                padding: 20px 10px !important;
+            }
+            #view-success > div {
+                padding: 24px 14px !important;
+                border-radius: 12px !important;
+            }
+        }
+
         @media print {
             body {
                 background: white !important;
@@ -668,7 +895,7 @@
                 </div>
                 <div class="card-body">
                     <!-- Filter Bar -->
-                    <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+                    <div class="filter-bar-responsive" style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
                         <input type="text" id="searchInput" class="form-control" placeholder="공사명, 책임자, 장소 검색..." style="width: 250px;" oninput="renderTable()">
                         <input type="date" id="dateInput" class="form-control" style="width: 160px;" onchange="renderTable()">
                         <button onclick="resetFilter()" class="btn btn-outline btn-sm">초기화</button>
@@ -676,7 +903,7 @@
                     </div>
 
                     <!-- Records Table -->
-                    <div style="overflow-x: auto;">
+                    <div class="table-scroll-wrapper" style="overflow-x: auto;">
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -707,8 +934,8 @@
             <div class="form-container">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <div>
-                        <h2 style="font-size: 22px; font-weight: 800; color: #0f172a;">TBM 일지 (위험예지활동) 작성</h2>
-                        <p style="font-size: 13px; color: #64748b; margin-top: 2px;">산업안전보건법 및 NW 작업안전가이드 관련 현장 작업 전 기록부</p>
+                        <h2 class="form-header-title" style="font-size: 22px; font-weight: 800; color: #0f172a;">TBM 일지 (위험예지활동) 작성</h2>
+                        <p class="form-header-sub" style="font-size: 13px; color: #64748b; margin-top: 2px;">산업안전보건법 및 NW 작업안전가이드 관련 현장 작업 전 기록부</p>
                     </div>
                     <button onclick="showTab('dashboard')" class="btn btn-outline btn-sm" id="formBackToListBtn">← 대시보드로</button>
                 </div>
@@ -1450,7 +1677,7 @@
                     });
                 }
             }
-        }, 50);
+        }, 100);
 
         document.getElementById('inp_worker_count').value = document.querySelectorAll('#attendeesListContainer > div').length || 1;
     }
